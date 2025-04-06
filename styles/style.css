@@ -1,0 +1,282 @@
+/* Estilos generales y reseteo básico */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    padding: 15px;
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+/* Contenedor principal */
+.timer-container {
+    max-width: 500px;
+    margin: 15px auto;
+    padding: 20px;
+    padding-top: 45px; /* Más padding arriba para dejar espacio al reloj */
+    position: relative; /* Para posicionar el reloj */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 51, 102, 0.1);
+    border-top: 5px solid #003366; /* Azul NEFRA */
+}
+
+/* Estilo para el Reloj */
+.clock-display {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #003366; /* Azul NEFRA */
+    background-color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    z-index: 10; /* Asegurar que esté visible */
+}
+
+
+h1 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #003366;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 1.2em;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #495057;
+}
+
+/* Selector de Turno */
+.shift-selector {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.shift-button {
+    padding: 10px 15px;
+    font-size: 1em;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #495057;
+    flex-grow: 1; /* Ocupar espacio */
+    margin: 0 5px; /* Pequeño margen entre botones */
+}
+
+.shift-button:hover {
+    background-color: #d8dde2;
+}
+.shift-button.active { /* Estilo para botón activo */
+    background-color: #003366; /* Azul NEFRA */
+    color: white;
+    border-color: #003366;
+    font-weight: bold;
+}
+
+/* Lista de Tareas */
+.task-list {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    min-height: 100px;
+    max-height: 300px; /* Altura máxima con scroll si es necesario */
+    overflow-y: auto; /* Scroll vertical si excede altura */
+}
+
+.task-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.task-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.95em;
+    cursor: default; /* Cambiar cursor por defecto */
+    transition: background-color 0.2s ease;
+}
+.task-list li:last-child { border-bottom: none; }
+
+/* Estilo Checkbox */
+.task-checkbox {
+    margin-right: 10px;
+    min-width: 18px;
+    min-height: 18px;
+    cursor: pointer;
+    flex-shrink: 0; /* Evitar que el checkbox se encoja */
+}
+
+/* Estilo del texto de la tarea (dentro del li) */
+.task-list li span.task-text {
+     flex-grow: 1;
+     /* Permitir click en texto para marcar checkbox (manejado por JS) */
+     cursor: pointer;
+}
+.task-list li span.task-time {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #495057;
+}
+.task-list li small { font-style: italic; color: #6c757d; margin-left: 5px; }
+
+
+/* Estilo Tareas Completadas */
+.task-list li.completed span.task-text {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+.task-list li.completed {
+    background-color: #e9ecef; /* Fondo más grisáceo */
+    opacity: 0.8;
+}
+
+
+/* Resaltado Tarea Actual */
+.task-list li.current-task {
+    background-color: #d1e7ff;
+    font-weight: bold;
+    color: #003366;
+    border-left: 4px solid #FF6600; /* Borde Naranja */
+    padding-left: 10px;
+    border-radius: 4px;
+    opacity: 1; /* Asegurar opacidad normal si está activa */
+}
+/* Texto de tarea actual Y completada */
+.task-list li.current-task.completed span.task-text {
+    text-decoration: line-through;
+    color: #0056b3; /* Un azul un poco más visible */
+}
+
+
+/* Separador */
+hr.separator {
+    border: none;
+    border-top: 1px solid #dee2e6 !important;
+    margin: 20px 0 !important;
+}
+
+
+/* Control del Timer */
+.timer-control {
+    margin-top: 20px;
+    text-align: center;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 6px;
+}
+
+.timer-control h3 {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #003366;
+}
+
+.timer-display {
+    font-size: 3em;
+    font-weight: bold;
+    color: #003366; /* Azul NEFRA */
+    margin-bottom: 20px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.timer-button {
+    padding: 12px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+.timer-button.start {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+.timer-button.start:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.timer-button.start:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.timer-button.stop {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+}
+.timer-button.stop:hover {
+    background-color: #c82333;
+}
+.timer-button:active {
+     transform: scale(0.97);
+}
+
+.timer-warning {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #FF6600; /* Naranja para advertencia */
+}
+
+
+/* Area de Alerta */
+.alert-area {
+    margin-top: 15px;
+    text-align: center;
+    min-height: 40px; /* Un poco más de altura */
+}
+
+.alert-message {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #17a2b8; /* Cian para alerta info */
+    color: white;
+    border-radius: 6px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+/* Footer Disclaimer */
+.footer-disclaimer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.8em;
+    color: #6c757d;
+}
+
+
+/* Media Query */
+@media (min-width: 600px) {
+    .timer-container {
+        max-width: 600px;
+    }
+    .shift-selector button {
+        padding: 10px 25px;
+    }
+}
