@@ -1,36 +1,48 @@
-// sw.js - Nombre de archivo corregido
+// sw.js - Service Worker
 
-const CACHE_NAME = 'guia-tiempos-cache-v2'; // Incrementa versión si cambias archivos cacheados
+const CACHE_NAME = 'guia-tiempos-cache-v3'; // Incrementa versión si cambias archivos cacheados
+// Lista de archivos a cachear - AJUSTA LAS RUTAS SI ES NECESARIO
 const urlsToCache = [
-  '.', // Cache la raíz (index.html)
-  'index.html',
-  'styles/style.css', // Asume CSS en carpeta styles
-  'scripts/schedule-data.js',
-  'scripts/timer-app.js',
-  'manifest.json',
-  'images/icon-192x192.png', // Añade tus íconos
-  'images/icon-512x512.png',
-  'sounds/timer_end.mp3' // Añade tus sonidos si los usas
-  // Añade otras imágenes o recursos que necesites offline
+  './', // Cache la raíz (index.html via './')
+  './index.html',
+  './styles/style.css', 
+  './scripts/schedule-data.js',
+  './scripts/timer-app.js',
+  './manifest.json',
+  './images/icon-192x192.png', // Asegúrate que esta ruta exista
+  './images/icon-512x512.png', // Asegúrate que esta ruta exista
+  './sounds/timer_end.mp3' // Añade tus sonidos si los usas
 ];
 
-// Instalar el Service Worker y cachear los archivos estáticos
+// Instalar
 self.addEventListener('install', event => {
-  console.log('[SW] Instalando v2...');
+  console.log('[SW] Instalando v3...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cache abierta, añadiendo archivos principales.');
-        return cache.addAll(urlsToCache);
+        console.log('[SW] Cache abierta, añadiendo archivos principales:', urlsToCache);
+        // Es importante manejar errores aquí por si un archivo no existe
+        return Promise.all(
+           urlsToCache.map(url => {
+              return cache.add(url).catch(err => {
+                 console.warn(`[SW] Falló al cachear ${url}: ${err}`);
+                 // Decide si la falla es crítica o no. Si es un ícono, quizás no lo sea.
+                 // Si es app.js o index.html, podría ser crítico.
+              });
+           })
+        );
       })
-      .catch(err => console.error("[SW] Falló cache.addAll: ", err))
+      .then(() => {
+         console.log("[SW] Archivos principales cacheados (o intentos realizados). Forzando activación...");
+         return self.skipWaiting(); // Forzar activación inmediata
+      })
+      .catch(err => console.error("[SW] Falló apertura de cache o skipWaiting: ", err))
   );
-  self.skipWaiting(); // Forzar activación inmediata
 });
 
-// Activar el Service Worker y limpiar cachés antiguas
+// Activar y limpiar cachés antiguas
 self.addEventListener('activate', event => {
-  console.log('[SW] Activando v2...');
+  console.log('[SW] Activando v3...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -44,81 +56,85 @@ self.addEventListener('activate', event => {
       );
     }).then(() => {
          console.log('[SW] Reclamando clientes...');
-         return self.clients.claim(); // Tomar control inmediato de las páginas
+         return self.clients.claim(); 
     })
   );
 });
 
-// Interceptar las solicitudes de red
+// Fetch (Estrategia: Cache First, luego Network)
 self.addEventListener('fetch', event => {
-    // console.log('[SW] Fetch interceptado para:', event.request.url); // Debug
+    // No interceptar peticiones que no sean http/https o que sean de extensiones
+    if (!(event.request.url.startsWith('http'))) { 
+       // console.log('[SW] Ignorando fetch para scheme no http(s):', event.request.url); // Debug
+        return; 
+    }
+     // No intentar cachear POST, PUT, DELETE, etc.
+     if (event.request.method !== 'GET') {
+         // console.log('[SW] Ignorando fetch para método no GET:', event.request.method); // Debug
+         return event.respondWith(fetch(event.request));
+     }
+
+
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Si está en caché, devolverlo desde la caché
+                // Cache hit - return response
                 if (response) {
-                    // console.log('[SW] Recurso encontrado en caché:', event.request.url); // Debug
+                    // console.log('[SW] Sirviendo desde caché:', event.request.url); // Debug
                     return response;
                 }
-                // console.log('[SW] Recurso NO encontrado en caché, buscando en red:', event.request.url); // Debug
 
-                // Si no, intentar obtenerlo de la red
+                // console.log('[SW] No en caché, buscando en red:', event.request.url); // Debug
                 return fetch(event.request).then(
                     networkResponse => {
-                        // console.log('[SW] Respuesta de red recibida para:', event.request.url); // Debug
-                        // Opcional: Cachear la nueva respuesta si es válida
+                        // console.log('[SW] Respuesta de red OK para:', event.request.url); // Debug
+
+                        // Check if we received a valid response
                         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-                            // console.log('[SW] Respuesta de red no válida para cachear.'); // Debug
+                             console.log('[SW] Respuesta de red no válida para cachear:', event.request.url, networkResponse.status); // Debug
                             return networkResponse;
                         }
 
-                        // Clona la respuesta para poder usarla y guardarla en caché
                         const responseToCache = networkResponse.clone();
 
                         caches.open(CACHE_NAME)
                             .then(cache => {
-                                // Cachea solo si es una solicitud GET
-                                if (event.request.method === 'GET') {
-                                     // console.log('[SW] Cacheando nueva respuesta para:', event.request.url); // Debug
-                                     cache.put(event.request, responseToCache);
-                                }
+                                // console.log('[SW] Cacheando nueva respuesta para:', event.request.url); // Debug
+                                cache.put(event.request, responseToCache);
                             });
+
                         return networkResponse;
                     }
                 ).catch(error => {
-                    console.error('[SW] Fetch fallido; error de red.', error);
-                    // Podrías devolver una página offline personalizada aquí si quieres
-                    // return caches.match('/offline.html');
-                    // O simplemente fallar (como hace por defecto si no hay catch)
+                    console.error('[SW] Error de Fetch; no se pudo obtener de red ni caché:', error);
+                    // Opcional: Devolver una respuesta offline genérica
+                    // return new Response("Contenido no disponible offline.", { headers: { 'Content-Type': 'text/plain' }});
                 });
             })
     );
 });
 
 
-// --- Manejo de Notificaciones (Desde el Service Worker) ---
+// Manejo de Notificaciones
 self.addEventListener('notificationclick', event => {
   console.log('[SW] Notificación clickeada:', event.notification.tag);
-  event.notification.close(); // Cierra la notificación
+  event.notification.close(); 
 
-  // Intenta enfocar una ventana existente de la app o abrir una nueva
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      // Verifica si alguna ventana ya está abierta
       for (let i = 0; i < windowClients.length; i++) {
         const client = windowClients[i];
-        // Ajusta la URL si tu app no está en la raíz '/'
-        if (client.url.endsWith('/') && 'focus' in client) {
+        // Ajusta '.' si tu app no está en la raíz
+        if (client.url.endsWith('/') && 'focus' in client) { 
           return client.focus();
         }
       }
-      // Si no hay ventanas abiertas, abre una nueva
       if (clients.openWindow) {
-        // Ajusta la URL si tu app no está en la raíz '/'
-        return clients.openWindow('.');
+         // Ajusta '.' si tu app no está en la raíz
+        return clients.openWindow('.'); 
       }
     })
   );
 });
 
-console.log('[SW] Service Worker cargado.');
+console.log('[SW] Service Worker v3 cargado y esperando eventos.');
