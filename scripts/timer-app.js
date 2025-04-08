@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let referenceReminderInterval = null;
     let remindedTasks = new Set();
     let isMuted = false;
-    const NOTIFICATION_DELAY = 300;
+    const NOTIFICATION_DELAY = 1000;// 1 segundo de retraso para la notificación
 
     // --- Inicialización ---
     function init() { /* Sin cambios */
