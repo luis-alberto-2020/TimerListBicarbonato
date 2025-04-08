@@ -1,62 +1,60 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guía de Tiempos SMAPD</title>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2c3e50"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Guía Tiempos">
-    <link rel="apple-touch-icon" href="images/icon-192x192.png">
-</head>
-<body>
-    <header>
-        <h1>Guía de Tiempos SMAPD (Listatimer)</h1>
-        <div id="clock">--:--:--</div>
-    </header>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Guía de Tiempos SMAPD</title>
+        <link rel="stylesheet" href="styles/style.css">
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#2c3e50"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Guía Tiempos">
+        <link rel="apple-touch-icon" href="images/icon-192x192.png">
+    </head>
+    <body>
+        <header>
+            <h1>Guía de Tiempos SMAPD (Listatimer)</h1>
+            <div id="clock">--:--:--</div>
+        </header>
 
-    <main>
-        <div class="controls">
-            <button id="morning-shift-btn">Turno Mañana</button>
-            <button id="afternoon-shift-btn">Turno Tarde</button>
-            <button id="request-notification-permission" style="display: none; margin-left: 10px;">Permitir Notificaciones</button>
-            <span class="mute-control" style="margin-left: 20px; display: inline-block; vertical-align: middle; color: #2c3e50;">
-                <input type="checkbox" id="mute-checkbox" style="vertical-align: middle;">
-                <label for="mute-checkbox" style="vertical-align: middle;">Silenciar Sonidos</label>
-            </span>
-        </div>
+        <main>
+            <div class="controls">
+                <button id="morning-shift-btn">Turno Mañana</button>
+                <button id="afternoon-shift-btn">Turno Tarde</button>
+                <button id="request-notification-permission" style="display: none; margin-left: 10px;">Permitir Notificaciones</button>
+                <span class="mute-control" style="margin-left: 20px; display: inline-block; vertical-align: middle; color: #2c3e50;">
+                    <input type="checkbox" id="mute-checkbox" style="vertical-align: middle;">
+                    <label for="mute-checkbox" style="vertical-align: middle;">Silenciar Sonidos/Vibración</label>
+                </span>
+            </div>
 
-        <div id="current-timer-section">
-            <h2>Timer Activo</h2>
-            <div id="timer-task-name">Ninguna</div>
-            <div id="timer-display">--:--</div>
-            <button id="stop-timer-btn" style="display: none;">Detener Timer Global (Oculto)</button>
-        </div>
-
-        <div id="schedule-section">
-            <h2 id="schedule-title">Selecciona un turno</h2>
-            <ul id="task-list">
-                </ul>
-        </div>
-
-        <div id="log-section">
-            <h3>Registro de Eventos</h3>
-            <div id="event-log-display">
+            <div id="current-timer-section">
+                <h2>Timer Activo</h2>
+                <div id="timer-task-name">Ninguna</div>
+                <div id="timer-display">--:--</div>
                 </div>
-             <button id="clear-log-btn" style="margin-top: 5px; font-size: 0.8em; padding: 3px 6px;">Limpiar Registro</button>
-        </div>
-         </main>
 
-    <footer>
-        </footer>
+            <div id="schedule-section">
+                <h2 id="schedule-title">Selecciona un turno</h2>
+                <ul id="task-list">
+                    </ul>
+            </div>
 
-    <audio id="timer-end-sound" src="sounds/timer_end.mp3" preload="auto"></audio>
-    <audio id="ref-reminder-sound" src="sounds/pip.mp3" preload="auto"></audio>
+            <div id="log-section">
+                <h3>Registro de Eventos</h3>
+                <div id="event-log-display">
+                    </div>
+                 <button id="clear-log-btn" style="margin-top: 5px; font-size: 0.8em; padding: 3px 6px;">Limpiar Registro</button>
+            </div>
 
-    <script src="scripts/schedule-data.js"></script>
-    <script src="scripts/timer-app.js"></script>
-</body>
-</html>
+        </main>
+
+        <footer>
+            </footer>
+
+        <audio id="timer-end-sound" src="sounds/pip.mp3" preload="auto"></audio>
+        <audio id="ref-reminder-sound" src="sounds/pip.mp3" preload="auto"></audio> <script src="scripts/schedule-data.js"></script>
+        <script src="scripts/timer-app.js"></script>
+    </body>
+    </html> 
