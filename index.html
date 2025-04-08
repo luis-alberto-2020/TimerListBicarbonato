@@ -10,7 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Guía Tiempos">
-    <link rel="apple-touch-icon" href="images/icon-192x192.png"> </head>
+    <link rel="apple-touch-icon" href="images/icon-192x192.png">
+</head>
 <body>
     <header>
         <h1>Guía de Tiempos SMAPD (Listatimer)</h1>
@@ -32,7 +33,7 @@
             <h2>Timer Activo</h2>
             <div id="timer-task-name">Ninguna</div>
             <div id="timer-display">--:--</div>
-            <button id="stop-timer-btn" style="display: none;">Detener Timer</button>
+            <button id="stop-timer-btn" style="display: none;">Detener Timer Global (Oculto)</button>
         </div>
 
         <div id="schedule-section">
@@ -45,8 +46,10 @@
     <footer>
         </footer>
 
-    <audio id="timer-end-sound" src="sounds/pip.mp3" preload="auto"></audio>
-    <audio id="ref-reminder-sound" src="sounds/pip.mp3" preload="auto"></audio> <script src="scripts/schedule-data.js"></script>
+    <audio id="timer-end-sound" src="sounds/timer_end.mp3" preload="auto"></audio>
+    <audio id="ref-reminder-sound" src="sounds/pip.mp3" preload="auto"></audio>
+
+    <script src="scripts/schedule-data.js"></script>
     <script src="scripts/timer-app.js"></script>
 </body>
 </html>
