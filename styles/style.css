@@ -1,4 +1,4 @@
-/* styles/style.css - CON ajustes para consistencia de botones */
+/* styles/style.css - CON ajustes REFORZADOS para layout responsive */
 body {
     font-family: sans-serif;
     margin: 0;
@@ -7,41 +7,22 @@ body {
 }
 
 header {
-    background-color: #2c3e50; /* Estilo NEFRA Azul oscuro */
-    color: white;
-    padding: 15px;
-    text-align: center;
-    position: relative;
+    background-color: #2c3e50; color: white; padding: 15px;
+    text-align: center; position: relative;
 }
-
 header h1 { margin: 0; font-size: 1.5em; }
-
 #clock {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 1.2em;
-    background-color: #34495e; /* Un poco más claro */
-    padding: 5px 10px;
-    border-radius: 5px;
+    position: absolute; top: 15px; right: 15px; font-size: 1.2em;
+    background-color: #34495e; padding: 5px 10px; border-radius: 5px;
 }
 
 main { padding: 15px; }
-
 .controls { margin-bottom: 20px; text-align: center; }
-
 .controls button {
-    padding: 10px 15px;
-    font-size: 1em;
-    cursor: pointer;
-    background-color: #3498db; /* Azul NEFRA */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    margin: 0 5px;
+    padding: 10px 15px; font-size: 1em; cursor: pointer; background-color: #3498db;
+    color: white; border: none; border-radius: 5px; margin: 0 5px;
 }
 .controls button:hover { background-color: #2980b9; }
-
 .mute-control label { cursor: pointer; }
 
 #current-timer-section {
@@ -58,87 +39,75 @@ main { padding: 15px; }
 
 #task-list { list-style: none; padding: 0; margin: 0; }
 
+/* Estilo base para LI - Flexbox fila por defecto */
 #task-list li {
     background-color: white; padding: 10px 15px; margin-bottom: 10px;
-    border-radius: 5px;
-    display: flex; /* Usar flexbox */
-    align-items: center; /* Alinear verticalmente al centro */
-    justify-content: space-between; /* Empujar elementos a los extremos */
-    flex-wrap: wrap; /* Permitir que bajen si no caben */
+    border-radius: 5px; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; /* Permitir wrap si es necesario */
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: background-color 0.3s ease, border-left 0.3s ease;
-    border-left: 3px solid transparent;
-    gap: 5px; /* Añadir un pequeño espacio entre elementos cuando envuelven */
+    border-left: 3px solid transparent; gap: 5px;
 }
 
-#task-list li input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); flex-shrink: 0; /* Evitar que el checkbox se encoja */ }
-#task-list li .task-info { flex-grow: 1; margin-right: 10px; min-width: 150px; /* Darle un ancho mínimo para evitar que se aplaste demasiado */ }
+#task-list li input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); flex-shrink: 0; }
+#task-list li .task-info { flex-grow: 1; margin-right: 10px; min-width: 150px; }
 #task-list li .task-name { font-weight: bold; }
 #task-list li .task-details { font-size: 0.9em; color: #7f8c8d; }
 
-/* Contenedor para botón y mini-timer para agruparlos */
-.task-actions {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0; /* Evitar que el contenedor se encoja */
-}
+/* Contenedor para botón y mini-timer */
+.task-actions { display: flex; align-items: center; flex-shrink: 0; }
 
-/* Estilos para botones Iniciar/Detener en la lista */
-.task-actions button { /* Estilo base para ambos botones */
-    padding: 5px 10px; font-size: 0.9em; cursor: pointer; color: white;
-    border: none; border-radius: 3px; white-space: nowrap;
-    /* Quitar margen izquierdo si está dentro de .task-actions */
-}
-.task-actions button.start-timer-btn { background-color: #2ecc71; } /* Verde */
+/* Estilos botones Iniciar/Detener */
+.task-actions button { padding: 5px 10px; font-size: 0.9em; cursor: pointer; color: white; border: none; border-radius: 3px; white-space: nowrap; }
+.task-actions button.start-timer-btn { background-color: #2ecc71; }
 .task-actions button.start-timer-btn:hover { background-color: #27ae60; }
 .task-actions button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
-
-/* Estilo para el botón cuando es "Detener" */
-.task-actions button.stop-active-timer-btn { background-color: #e74c3c; } /* Rojo */
+.task-actions button.stop-active-timer-btn { background-color: #e74c3c; }
 .task-actions button.stop-active-timer-btn:hover { background-color: #c0392b; }
 
-/* Estilo para el mini timer dentro del item */
-.task-actions .mini-timer-display {
-    font-size: 0.9em; font-weight: bold; color: #e74c3c;
-    margin-left: 8px; /* Espacio a la izquierda del mini timer */
-    display: none; /* Oculto por defecto */
-}
+/* Estilo mini timer */
+.task-actions .mini-timer-display { font-size: 0.9em; font-weight: bold; color: #e74c3c; margin-left: 8px; display: none; }
 
+/* Estilos de estado LI */
 #task-list li.completed .task-info { text-decoration: line-through; opacity: 0.6; }
-
-#task-list li.active-timer {
-    background-color: #f1c40f !important; /* Amarillo */
-    font-weight: bold; border-left-color: #f39c12 !important;
-}
+#task-list li.active-timer { background-color: #f1c40f !important; font-weight: bold; border-left-color: #f39c12 !important; }
 #task-list li.active-timer.current-reference-time { border-left-color: #f39c12 !important; }
-
-#task-list li.current-reference-time {
-    background-color: #f8f9fa; border-left-color: #7f8c8d;
-}
+#task-list li.current-reference-time { background-color: #f8f9fa; border-left-color: #7f8c8d; }
 
 footer { text-align: center; margin-top: 20px; padding: 10px; color: #7f8c8d; font-size: 0.9em; }
 
+/* ============================================ */
 /* Media Query para pantallas pequeñas (< 600px) */
+/* ============================================ */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2em; }
     #clock { font-size: 1em; padding: 3px 6px; top: 10px; right: 10px; }
     .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .mute-control { width: 100%; text-align: center; margin-left: 0 !important; margin-top: 10px; }
 
+    /* ** CAMBIO PRINCIPAL AQUÍ ** */
     #task-list li {
-        /* Mantenemos flex-wrap: wrap de la regla base */
-        /* No forzamos flex-direction: column */
-        padding: 12px; border-left-width: 5px;
-        align-items: flex-start; /* Alinear items arriba por si envuelven */
+        flex-direction: column; /* FORZAR COLUMNA */
+        align-items: flex-start; /* Alinear items a la izquierda */
+        padding: 12px;
+        border-left-width: 5px;
     }
-     #task-list li .task-info {
-         margin-bottom: 5px; /* Espacio si los botones bajan */
-         margin-right: 5px;
-         min-width: 100px; /* Reducir ancho mínimo en móvil */
+    #task-list li .task-info {
+        margin-bottom: 8px; /* Espacio entre info y acciones */
+        margin-right: 0;
+        width: 100%; /* Que la info ocupe el ancho */
+    }
+    /* Alinear el CONTENEDOR de acciones a la derecha */
+    .task-actions {
+        margin-top: 5px;
+        align-self: flex-end; /* ALINEAR A LA DERECHA */
+        width: auto; /* Ancho automático según contenido */
+    }
+    /* Asegurar que el botón dentro también se alinee si es necesario */
+     .task-actions button {
+         /* Estilos base ya definidos */
      }
-     /* Contenedor de acciones se alinea normalmente */
-     .task-actions {
-         margin-top: 0;
-         align-self: center; /* Centrar verticalmente si hay espacio */
+     .task-actions .mini-timer-display {
+         /* Estilos base ya definidos */
      }
 }
