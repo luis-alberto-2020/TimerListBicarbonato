@@ -1,4 +1,4 @@
-/* styles/style.css - Final con Timer Fijo, Log y estilos responsive mejorados */
+/* styles/style.css - Final con Timer Fijo, Log, Modal Calc y estilos responsive */
 body {
     font-family: sans-serif;
     margin: 0;
@@ -15,13 +15,9 @@ header {
 }
 header h1 { margin: 0; font-size: 1.5em; }
 #clock {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 1.2em;
+    position: absolute; top: 15px; right: 15px; font-size: 1.2em;
     background-color: #34495e; /* Un poco más claro */
-    padding: 5px 10px;
-    border-radius: 5px;
+    padding: 5px 10px; border-radius: 5px;
 }
 
 main { padding: 15px; }
@@ -91,14 +87,9 @@ main { padding: 15px; }
     border-bottom: 1px solid #bdc3c7; padding-bottom: 5px;
 }
 #event-log-display {
-    max-height: 150px; /* Altura máxima, luego scroll */
-    overflow-y: auto;  /* Scroll vertical si se llena */
-    background-color: #ecf0f1; /* Fondo interno */
-    border: 1px solid #bdc3c7; /* Borde sutil */
-    padding: 10px;
-    font-size: 0.85em; /* Letra un poco más pequeña */
-    line-height: 1.4;
-    border-radius: 3px;
+    max-height: 150px; overflow-y: auto; background-color: #ecf0f1;
+    border: 1px solid #bdc3c7; padding: 10px; font-size: 0.85em;
+    line-height: 1.4; border-radius: 3px;
 }
 #event-log-display p { margin: 0 0 4px 0; padding: 0; border-bottom: 1px dashed #dde; padding-bottom: 3px; }
 #event-log-display p:last-child { border-bottom: none; }
@@ -109,6 +100,39 @@ main { padding: 15px; }
 }
 #clear-log-btn:hover { background-color: #7f8c8d; }
 
+/* Estilos para Botón Calculadora */
+#calculator-btn {
+    position: fixed; bottom: 20px; left: 20px; z-index: 999;
+    background-color: #3498db; color: white; border: none;
+    border-radius: 50%; width: 55px; height: 55px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+}
+#calculator-btn:hover { background-color: #2980b9; }
+#calculator-btn svg { width: 28px; height: 28px; stroke: white; }
+
+/* Estilos para Modal Calculadora */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); display: none; /* Cambiado a none por defecto */
+    align-items: center; justify-content: center; z-index: 1000;
+    padding: 10px; box-sizing: border-box;
+}
+.modal-content {
+    position: relative; background-color: #fff; padding: 0;
+    border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 95%; height: 85%; max-width: 500px; max-height: 700px;
+    overflow: hidden; display: flex; flex-direction: column;
+}
+.modal-close {
+    position: absolute; top: 5px; right: 10px; background: none; border: none;
+    font-size: 2.5rem; line-height: 1; color: #888; cursor: pointer;
+    padding: 0; z-index: 1001;
+}
+.modal-close:hover { color: #333; }
+#calculator-iframe { flex-grow: 1; border: none; width: 100%; height: 100%; }
+
 
 footer { text-align: center; margin-top: 20px; padding: 10px; color: #7f8c8d; font-size: 0.9em; }
 
@@ -117,20 +141,24 @@ footer { text-align: center; margin-top: 20px; padding: 10px; color: #7f8c8d; fo
     header { padding: 10px; }
     header h1 { font-size: 1.2em; }
     #clock { font-size: 1em; padding: 3px 6px; top: 10px; right: 10px; }
-    main { padding-top: 5px; }
+    main { padding-top: 5px; padding-bottom: 80px; /* Añadir padding abajo para que el botón flotante no tape contenido */ }
     #current-timer-section { padding: 10px; }
     #timer-display { font-size: 2em; }
     .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px;}
     .mute-control { width: 100%; text-align: center; margin-left: 0 !important; margin-top: 10px; }
 
     /* Forzar columna y alinear acciones a la derecha */
-    #task-list li {
-        flex-direction: column; align-items: flex-start;
-        padding: 12px; border-left-width: 5px;
-    }
+    #task-list li { flex-direction: column; align-items: flex-start; padding: 12px; border-left-width: 5px; }
     #task-list li .task-info { margin-bottom: 8px; margin-right: 0; width: 100%; min-width: auto; }
     .task-actions { margin-top: 5px; align-self: flex-end; width: auto; }
 
     #log-section { padding: 10px; }
     #event-log-display { max-height: 120px; font-size: 0.8em; }
+
+    /* Ajustar botón calculadora en móvil */
+    #calculator-btn { width: 50px; height: 50px; bottom: 15px; left: 15px; }
+    #calculator-btn svg { width: 24px; height: 24px; }
+    /* Ajustar modal en móvil */
+    .modal-content { width: 98%; height: 90%; max-width: none; max-height: none; }
+    .modal-close { font-size: 2rem; top: 8px; right: 12px; }
 }

@@ -1,5 +1,4 @@
-    // timer-app.js - Final con Log de Eventos, sin Notificaciones de Sistema para eventos,
-    // con timer fijo, mini-timer, botón toggle, vibración y mute.
+    // timer-app.js - Final con Log, Modal Calc, Timer Fijo, Mini-Timer, Botón Toggle, Vibración, Mute
     document.addEventListener('DOMContentLoaded', () => {
         // --- Elementos del DOM ---
         const clockElement = document.getElementById('clock');
@@ -15,6 +14,11 @@
         const muteCheckbox = document.getElementById('mute-checkbox');
         const logDisplay = document.getElementById('event-log-display');
         const clearLogBtn = document.getElementById('clear-log-btn');
+        // Elementos del Modal Calculadora
+        const calculatorBtn = document.getElementById('calculator-btn');
+        const calculatorModal = document.getElementById('calculator-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const calculatorIframe = document.getElementById('calculator-iframe');
 
         // --- Estado de la Aplicación ---
         let currentShift = null;
@@ -22,11 +26,12 @@
         let activeTimerInterval = null;
         let remainingSeconds = 0;
         let activeTaskId = null;
-        let activeButtonElement = null; // Referencia al botón activo (modo Detener)
+        let activeButtonElement = null;
         let referenceReminderInterval = null;
         let remindedTasks = new Set();
         let isMuted = false;
-        const MAX_LOG_ENTRIES = 30; // Límite de entradas en el log
+        const MAX_LOG_ENTRIES = 30;
+        const CALCULATOR_URL = 'https://luis-alberto-2020.github.io/bicarbonato-calculadora/'; // URL Calculadora
 
         // --- Inicialización ---
         function init() {
@@ -35,31 +40,28 @@
             afternoonShiftBtn.addEventListener('click', () => loadShift('afternoon'));
             muteCheckbox.addEventListener('change', handleMuteChange);
             clearLogBtn.addEventListener('click', clearLog);
+            // Listeners para el modal calculadora
+            calculatorBtn.addEventListener('click', openCalculatorModal);
+            modalCloseBtn.addEventListener('click', closeCalculatorModal);
+            calculatorModal.addEventListener('click', (event) => { if (event.target === calculatorModal) { closeCalculatorModal(); } });
 
             loadMuteState();
             const lastShift = localStorage.getItem('lastShift');
             if (lastShift) { loadShift(lastShift); }
-            else { scheduleTitle.textContent = 'Selecciona un turno'; } // Mensaje inicial si no hay turno guardado
-
-            setupNotificationButton(); // Mantenemos para el permiso inicial
+            else { scheduleTitle.textContent = 'Selecciona un turno'; }
+            setupNotificationButton();
             addLogMessage("Aplicación iniciada.");
         }
 
         // --- Log de Eventos ---
         function addLogMessage(message) {
             if (!logDisplay) { console.warn("Log display not found"); return; }
-            const now = new Date();
-            const timestamp = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const logEntry = document.createElement('p');
-            logEntry.style.margin = '2px 0';
-            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`; // Usar innerHTML para negrita opcional
-            logDisplay.insertBefore(logEntry, logDisplay.firstChild); // Añadir al principio (más nuevo arriba)
-            while (logDisplay.childElementCount > MAX_LOG_ENTRIES) { logDisplay.removeChild(logDisplay.lastChild); } // Limitar tamaño
+            const now = new Date(); const timestamp = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const logEntry = document.createElement('p'); logEntry.style.margin = '2px 0'; logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logDisplay.insertBefore(logEntry, logDisplay.firstChild);
+            while (logDisplay.childElementCount > MAX_LOG_ENTRIES) { logDisplay.removeChild(logDisplay.lastChild); }
         }
-         function clearLog() {
-             if(logDisplay) { logDisplay.innerHTML = ''; addLogMessage("Registro limpiado."); }
-         }
-
+         function clearLog() { if(logDisplay) { logDisplay.innerHTML = ''; addLogMessage("Registro limpiado."); } }
 
         // --- Silencio (Mute) ---
         function loadMuteState() { const savedMuteState = localStorage.getItem('isMuted'); isMuted = savedMuteState === 'true'; muteCheckbox.checked = isMuted; console.log("Mute state loaded:", isMuted); }
@@ -141,18 +143,14 @@
 
         function updateTimerDisplay() { const minutes = Math.max(0, Math.floor(remainingSeconds / 60)); const seconds = Math.max(0, remainingSeconds % 60); const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; timerDisplay.textContent = formattedTime; if (activeTaskId) { const activeLi = document.getElementById(activeTaskId); if (activeLi) { const miniTimer = activeLi.querySelector('.mini-timer-display'); if (miniTimer) { miniTimer.textContent = formattedTime; miniTimer.style.display = 'inline-block'; } } } }
 
-        function timerFinished(task) { // Quitado showNotification, añadido log
+        function timerFinished(task) { // Quitada notificación de sistema
             const taskName = task ? task.name : "Tarea desconocida";
-            vibrateDevice([200, 100, 200]); // Vibrar (respeta mute)
-            playTimerEndSound();            // Sonido (respeta mute)
-            const wasActiveTaskId = activeTaskId; // Guardar ID porque stopCurrentTimer lo limpia
-            stopCurrentTimer(); // Limpia intervalo, etc.
-
+            vibrateDevice([200, 100, 200]); playTimerEndSound();
+            const wasActiveTaskId = activeTaskId; stopCurrentTimer();
             const message = `¡Tiempo completado para: ${taskName}!`;
-            // Mantenemos el alert bloqueante por ahora, según lo último discutido
-            alert(message);
-            addLogMessage(`Timer finalizado: ${taskName}`); // Añadir a log
-            // Ya no llamamos a showNotification para este evento
+            // Reemplazamos alert con mensaje no bloqueante
+             showCustomAlert(message); // Usamos el alert personalizado
+            addLogMessage(`Timer finalizado: ${taskName}`);
             console.log(message);
         }
 
@@ -186,7 +184,7 @@
             playRefReminderSound(); // Sonido (respeta mute)
             vibrateDevice(50); // Vibración (respeta mute)
             addLogMessage(`Recordatorio ref: ${task.name} (${task.time})`); // Añadir a log
-            // Ya no llamamos a showNotification para este evento
+            // Ya no llamamos a showNotification
         }
 
         // --- Notificaciones del Sistema (Solo para permiso inicial) ---
@@ -194,9 +192,27 @@
         // Esta función ahora solo se usa realmente al conceder permiso
         function showNotification(title, body) { if (!('Notification' in window) || Notification.permission !== 'granted') { return; } navigator.serviceWorker.getRegistration().then(registration => { if (registration) { registration.showNotification(title, { body: body, icon: 'images/icon-192x192.png' }).catch(err => console.error("Error SW showNotification:", err)); } else { console.warn("SW not registrado, notificación fallback puede fallar."); try { new Notification(title, { body: body, icon: 'images/icon-192x192.png' }); } catch (err) { console.error("Error direct Notification:", err); } } }).catch(err => console.error("Error getRegistration SW:", err)); }
 
+        // --- Lógica del Modal Calculadora ---
+        function openCalculatorModal() {
+            console.log("Abriendo modal calculadora...");
+            // Añadir timestamp a URL para intentar evitar caché del iframe
+            calculatorIframe.src = `${CALCULATOR_URL}?t=${Date.now()}`;
+            calculatorModal.style.display = 'flex';
+            addLogMessage("Calculadora abierta.");
+        }
+
+        function closeCalculatorModal() {
+            console.log("Cerrando modal calculadora...");
+            calculatorModal.style.display = 'none';
+            calculatorIframe.src = 'about:blank'; // Limpiar src
+            addLogMessage("Calculadora cerrada.");
+        }
+
+
         // --- Service Worker (PWA) ---
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(reg => console.log('SW registrado. Scope:', reg.scope)).catch(err => console.log('Error registro SW:', err)); } else { console.log("Service workers no soportados."); }
 
         // --- Iniciar la aplicación ---
         init();
     });
+    
