@@ -1,282 +1,201 @@
-/* Estilos generales y reseteo básico */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    line-height: 1.6;
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #ecf0f1;
+    color: #2c3e50;
+}
+
+header {
+    background-color: #2c3e50; /* Estilo NEFRA Azul oscuro */
+    color: white;
     padding: 15px;
-    background-color: #f8f9fa;
-    color: #343a40;
+    text-align: center;
+    position: relative;
 }
 
-/* Contenedor principal */
-.timer-container {
-    max-width: 500px;
-    margin: 15px auto;
-    padding: 20px;
-    padding-top: 45px; /* Más padding arriba para dejar espacio al reloj */
-    position: relative; /* Para posicionar el reloj */
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 51, 102, 0.1);
-    border-top: 5px solid #003366; /* Azul NEFRA */
-}
-
-/* Estilo para el Reloj */
-.clock-display {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #003366; /* Azul NEFRA */
-    background-color: #fff;
-    padding: 3px 8px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    z-index: 10; /* Asegurar que esté visible */
-}
-
-
-h1 {
+header h1 {
+    margin: 0;
     font-size: 1.5em;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #003366;
-    font-weight: 600;
 }
 
-h2 {
+#clock {
+    position: absolute;
+    top: 15px;
+    right: 15px;
     font-size: 1.2em;
-    margin-top: 15px;
-    margin-bottom: 10px;
-    text-align: center;
-    color: #495057;
+    background-color: #34495e; /* Un poco más claro */
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
-/* Selector de Turno */
-.shift-selector {
-    display: flex;
-    justify-content: space-around;
+main {
+    padding: 15px;
+}
+
+.controls {
     margin-bottom: 20px;
+    text-align: center;
 }
 
-.shift-button {
+.controls button {
     padding: 10px 15px;
     font-size: 1em;
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    color: #495057;
-    flex-grow: 1; /* Ocupar espacio */
-    margin: 0 5px; /* Pequeño margen entre botones */
-}
-
-.shift-button:hover {
-    background-color: #d8dde2;
-}
-.shift-button.active { /* Estilo para botón activo */
-    background-color: #003366; /* Azul NEFRA */
+    background-color: #3498db; /* Azul NEFRA */
     color: white;
-    border-color: #003366;
+    border: none;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.controls button:hover {
+    background-color: #2980b9;
+}
+
+#current-timer-section {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+#current-timer-section h2 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+#timer-display {
+    font-size: 2.5em;
     font-weight: bold;
+    color: #e74c3c; /* Rojo para el timer */
+    margin: 10px 0;
 }
 
-/* Lista de Tareas */
-.task-list {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    min-height: 100px;
-    max-height: 300px; /* Altura máxima con scroll si es necesario */
-    overflow-y: auto; /* Scroll vertical si excede altura */
+#stop-timer-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#stop-timer-btn:hover {
+    background-color: #c0392b;
 }
 
-.task-list ul {
+
+#schedule-section h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+}
+
+#task-list {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.task-list li {
+#task-list li {
+    background-color: white;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
-    padding: 10px 5px;
-    border-bottom: 1px solid #e9ecef;
-    font-size: 0.95em;
-    cursor: default; /* Cambiar cursor por defecto */
-    transition: background-color 0.2s ease;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.5s ease; /* Transición para resaltado */
 }
-.task-list li:last-child { border-bottom: none; }
 
-/* Estilo Checkbox */
-.task-checkbox {
+#task-list li input[type="checkbox"] {
     margin-right: 10px;
-    min-width: 18px;
-    min-height: 18px;
+    transform: scale(1.2); /* Checkbox un poco más grande */
+}
+
+#task-list li .task-info {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+#task-list li .task-name {
+    font-weight: bold;
+}
+
+#task-list li .task-details {
+    font-size: 0.9em;
+    color: #7f8c8d; /* Gris */
+}
+
+#task-list li .start-timer-btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
     cursor: pointer;
-    flex-shrink: 0; /* Evitar que el checkbox se encoja */
-}
-
-/* Estilo del texto de la tarea (dentro del li) */
-.task-list li span.task-text {
-     flex-grow: 1;
-     /* Permitir click en texto para marcar checkbox (manejado por JS) */
-     cursor: pointer;
-}
-.task-list li span.task-time {
-    font-weight: bold;
-    margin-right: 5px;
-    color: #495057;
-}
-.task-list li small { font-style: italic; color: #6c757d; margin-left: 5px; }
-
-
-/* Estilo Tareas Completadas */
-.task-list li.completed span.task-text {
-    text-decoration: line-through;
-    color: #6c757d;
-}
-.task-list li.completed {
-    background-color: #e9ecef; /* Fondo más grisáceo */
-    opacity: 0.8;
-}
-
-
-/* Resaltado Tarea Actual */
-.task-list li.current-task {
-    background-color: #d1e7ff;
-    font-weight: bold;
-    color: #003366;
-    border-left: 4px solid #FF6600; /* Borde Naranja */
-    padding-left: 10px;
-    border-radius: 4px;
-    opacity: 1; /* Asegurar opacidad normal si está activa */
-}
-/* Texto de tarea actual Y completada */
-.task-list li.current-task.completed span.task-text {
-    text-decoration: line-through;
-    color: #0056b3; /* Un azul un poco más visible */
-}
-
-
-/* Separador */
-hr.separator {
-    border: none;
-    border-top: 1px solid #dee2e6 !important;
-    margin: 20px 0 !important;
-}
-
-
-/* Control del Timer */
-.timer-control {
-    margin-top: 20px;
-    text-align: center;
-    padding: 15px;
-    background-color: #e9ecef;
-    border-radius: 6px;
-}
-
-.timer-control h3 {
-    font-size: 1.1em;
-    margin-bottom: 15px;
-    color: #003366;
-}
-
-.timer-display {
-    font-size: 3em;
-    font-weight: bold;
-    color: #003366; /* Azul NEFRA */
-    margin-bottom: 20px;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-.timer-button {
-    padding: 12px 20px;
-    font-size: 1em;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    margin: 0 5px;
-    font-weight: bold;
-}
-
-.timer-button.start {
-    background-color: #28a745; /* Verde */
+    background-color: #2ecc71; /* Verde */
     color: white;
+    border: none;
+    border-radius: 3px;
+    white-space: nowrap;
 }
-.timer-button.start:disabled {
-    background-color: #adb5bd;
+#task-list li .start-timer-btn:hover {
+    background-color: #27ae60;
+}
+#task-list li .start-timer-btn:disabled {
+    background-color: #bdc3c7; /* Gris claro para deshabilitado */
     cursor: not-allowed;
+}
+
+
+#task-list li.completed .task-info {
+    text-decoration: line-through;
     opacity: 0.7;
 }
-.timer-button.start:hover:not(:disabled) {
-    background-color: #218838;
+
+#task-list li.active-timer {
+    background-color: #f1c40f; /* Amarillo para timer activo */
+    font-weight: bold;
 }
 
-.timer-button.stop {
-    background-color: #dc3545; /* Rojo */
-    color: white;
-}
-.timer-button.stop:hover {
-    background-color: #c82333;
-}
-.timer-button:active {
-     transform: scale(0.97);
+#task-list li.reminder-highlight {
+    animation: reminderPulse 1s 2; /* Aplica animación 2 veces */
 }
 
-.timer-warning {
-    display: block;
-    margin-top: 10px;
+@keyframes reminderPulse {
+    0% { background-color: white; }
+    50% { background-color: #e9ecef; } /* Gris muy claro */
+    100% { background-color: white; }
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    color: #7f8c8d;
     font-size: 0.9em;
-    font-weight: bold;
-    color: #FF6600; /* Naranja para advertencia */
 }
 
-
-/* Area de Alerta */
-.alert-area {
-    margin-top: 15px;
-    text-align: center;
-    min-height: 40px; /* Un poco más de altura */
-}
-
-.alert-message {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #17a2b8; /* Cian para alerta info */
-    color: white;
-    border-radius: 6px;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-
-/* Footer Disclaimer */
-.footer-disclaimer {
-    text-align: center;
-    margin-top: 30px;
-    padding-top: 10px;
-    border-top: 1px solid #e9ecef;
-    font-size: 0.8em;
-    color: #6c757d;
-}
-
-
-/* Media Query */
-@media (min-width: 600px) {
-    .timer-container {
-        max-width: 600px;
+/* Media Query para pantallas pequeñas */
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.2em;
     }
-    .shift-selector button {
-        padding: 10px 25px;
+    #clock {
+        font-size: 1em;
+        padding: 3px 6px;
+        top: 10px;
+        right: 10px;
+    }
+    #task-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #task-list li .task-info {
+        margin-bottom: 5px;
+    }
+    #task-list li .start-timer-btn {
+        margin-top: 5px;
+        align-self: flex-end;
     }
 }
