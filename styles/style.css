@@ -1,4 +1,4 @@
-/* Contenido CSS completo - SIN la regla del borde rojo de prueba */
+/* Contenido CSS completo con marcador de referencia persistente */
 body {
     font-family: sans-serif;
     margin: 0;
@@ -52,6 +52,12 @@ main {
 .controls button:hover {
     background-color: #2980b9;
 }
+
+/* Estilo para el control de silencio */
+.mute-control label {
+     cursor: pointer;
+}
+
 
 #current-timer-section {
     background-color: #fff;
@@ -108,12 +114,13 @@ main {
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: background-color 0.5s ease; /* Transición para resaltado */
+    transition: background-color 0.3s ease, border-left 0.3s ease;
+    border-left: 3px solid transparent; /* Borde inicial transparente */
 }
 
 #task-list li input[type="checkbox"] {
     margin-right: 10px;
-    transform: scale(1.2); /* Checkbox un poco más grande */
+    transform: scale(1.2);
 }
 
 #task-list li .task-info {
@@ -127,7 +134,7 @@ main {
 
 #task-list li .task-details {
     font-size: 0.9em;
-    color: #7f8c8d; /* Gris */
+    color: #7f8c8d;
 }
 
 #task-list li .start-timer-btn {
@@ -144,29 +151,27 @@ main {
     background-color: #27ae60;
 }
 #task-list li .start-timer-btn:disabled {
-    background-color: #bdc3c7; /* Gris claro para deshabilitado */
+    background-color: #bdc3c7;
     cursor: not-allowed;
 }
 
-
+/* Estilo para tarea completada */
 #task-list li.completed .task-info {
     text-decoration: line-through;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
+/* Estilo para timer activo (prioridad alta) */
 #task-list li.active-timer {
-    background-color: #f1c40f; /* Amarillo para timer activo */
+    background-color: #f1c40f !important; /* Amarillo, !important para asegurar override */
     font-weight: bold;
+    border-left-color: #f39c12 !important; /* Borde naranja/amarillo oscuro */
 }
 
-#task-list li.reminder-highlight {
-    animation: reminderPulse 1s 2; /* Aplica animación 2 veces */
-}
-
-@keyframes reminderPulse {
-    0% { background-color: white; }
-    50% { background-color: #e9ecef; } /* Gris muy claro */
-    100% { background-color: white; }
+/* Estilo para hora de referencia actual (prioridad baja) */
+#task-list li.current-reference-time {
+    background-color: #f8f9fa; /* Gris muy claro */
+    border-left-color: #7f8c8d; /* Borde gris sutil */
 }
 
 footer {
@@ -188,15 +193,31 @@ footer {
         top: 10px;
         right: 10px;
     }
+     .controls {
+        display: flex;
+        flex-wrap: wrap; /* Permite que los elementos bajen */
+        justify-content: center; /* Centra los elementos */
+        gap: 10px; /* Espacio entre elementos */
+    }
+    .mute-control {
+         width: 100%; /* Ocupa todo el ancho en línea nueva */
+         text-align: center;
+         margin-left: 0 !important; /* Anula margen inline */
+         margin-top: 10px; /* Espacio arriba */
+    }
+
     #task-list li {
         flex-direction: column;
         align-items: flex-start;
+        padding: 12px; /* Un poco más de padding */
+        border-left-width: 5px; /* Borde más grueso en móvil */
     }
     #task-list li .task-info {
-        margin-bottom: 5px;
+        margin-bottom: 8px;
+        margin-right: 0;
     }
     #task-list li .start-timer-btn {
-        margin-top: 5px;
-        align-self: flex-end;
+        margin-top: 8px;
+        align-self: flex-end; /* Botón a la derecha */
     }
 }

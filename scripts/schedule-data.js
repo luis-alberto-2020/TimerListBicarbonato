@@ -34,9 +34,9 @@ const scheduleData = {
 // Tiempos especiales ajustados (en segundos para la lógica del timer)
 // Si alguna tarea de arriba debe usar 25 o 30min FIJOS, pon su nombre EXACTO aquí.
 const ADJUSTED_TIMES = {
-     // Ejemplo: Si la mezcla se llamara 'Mezcla Especial':
-     // 'Mezcla Especial': 25 * 60, 
-     // Ejemplo: Si la desinfección se llamara 'Desinfección Post-Cloro':
-     // 'Desinfección Post-Cloro': 30 * 60 
-     // Añade aquí los nombres exactos de las tareas de tus listas que requieran 25 o 30 min
+     // Ejemplo: Si la tarea 'Recirculado de Preparacion de Bicarbonato' es la mezcla y dura 25min:
+     'Recirculado de Preparacion de Bicarbonato': 25 * 60,
+     // Ejemplo: Si la tarea 'Desinfección X' es la desinfección y dura 30min:
+     // 'Desinfección X': 30 * 60
+     // Revisa tus nombres exactos y ajusta aquí si es necesario.
 };
