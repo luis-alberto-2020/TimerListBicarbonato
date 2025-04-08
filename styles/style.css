@@ -1,102 +1,89 @@
-/* styles/style.css - CON Timer Fijo y estilos previos */
-body {
-    font-family: sans-serif;
-    margin: 0;
-    background-color: #ecf0f1;
-    color: #2c3e50;
-}
+/* styles/style.css - CON Timer Fijo, estilos previos y estilos para LOG */
+body { /* ... (sin cambios) ... */ }
+header { /* ... (sin cambios) ... */ }
+header h1 { /* ... (sin cambios) ... */ }
+#clock { /* ... (sin cambios) ... */ }
+main { /* ... (sin cambios) ... */ }
+.controls { /* ... (sin cambios) ... */ }
+.controls button { /* ... (sin cambios) ... */ }
+.controls button:hover { /* ... (sin cambios) ... */ }
+.mute-control label { /* ... (sin cambios) ... */ }
+#current-timer-section { /* ... (sin cambios, mantiene sticky) ... */ }
+#current-timer-section h2 { /* ... (sin cambios) ... */ }
+#timer-display { /* ... (sin cambios) ... */ }
+#stop-timer-btn { /* ... (sin cambios) ... */ }
+#stop-timer-btn:hover { /* ... (sin cambios) ... */ }
+#schedule-section h2 { /* ... (sin cambios) ... */ }
+#task-list { /* ... (sin cambios) ... */ }
+#task-list li { /* ... (sin cambios) ... */ }
+#task-list li input[type="checkbox"] { /* ... (sin cambios) ... */ }
+#task-list li .task-info { /* ... (sin cambios) ... */ }
+#task-list li .task-name { /* ... (sin cambios) ... */ }
+#task-list li .task-details { /* ... (sin cambios) ... */ }
+.task-actions { /* ... (sin cambios) ... */ }
+.task-actions button { /* ... (sin cambios) ... */ }
+.task-actions button.start-timer-btn { /* ... (sin cambios) ... */ }
+.task-actions button.start-timer-btn:hover { /* ... (sin cambios) ... */ }
+.task-actions button:disabled { /* ... (sin cambios) ... */ }
+.task-actions button.stop-active-timer-btn { /* ... (sin cambios) ... */ }
+.task-actions button.stop-active-timer-btn:hover { /* ... (sin cambios) ... */ }
+.task-actions .mini-timer-display { /* ... (sin cambios) ... */ }
+#task-list li.completed .task-info { /* ... (sin cambios) ... */ }
+#task-list li.active-timer { /* ... (sin cambios) ... */ }
+#task-list li.active-timer.current-reference-time { /* ... (sin cambios) ... */ }
+#task-list li.current-reference-time { /* ... (sin cambios) ... */ }
+footer { /* ... (sin cambios) ... */ }
 
-header {
-    background-color: #2c3e50; color: white; padding: 15px;
-    text-align: center; position: relative;
-    /* Si el header también fuera sticky, necesitaríamos ajustar el 'top' del timer */
-}
-header h1 { margin: 0; font-size: 1.5em; }
-#clock {
-    position: absolute; top: 15px; right: 15px; font-size: 1.2em;
-    background-color: #34495e; padding: 5px 10px; border-radius: 5px;
-}
-
-main { padding: 15px; }
-.controls { margin-bottom: 20px; text-align: center; }
-.controls button {
-    padding: 10px 15px; font-size: 1em; cursor: pointer; background-color: #3498db;
-    color: white; border: none; border-radius: 5px; margin: 0 5px;
-}
-.controls button:hover { background-color: #2980b9; }
-.mute-control label { cursor: pointer; }
-
-/* === CAMBIO AQUÍ para Timer Fijo === */
-#current-timer-section {
-    background-color: #ffffff; /* Fondo blanco para que no sea transparente */
+/* === NUEVOS ESTILOS PARA EL LOG === */
+#log-section {
+    margin-top: 25px; /* Espacio sobre el log */
     padding: 15px;
-    margin-bottom: 20px; /* Mantiene espacio antes de la lista */
+    background-color: #fdfdfe; /* Fondo ligeramente distinto */
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    text-align: center;
-    /* --- Sticky positioning --- */
-    position: sticky;
-    top: 0; /* Pegado arriba */
-    z-index: 10; /* Asegurar que esté sobre la lista al hacer scroll */
-    /* border-bottom: 1px solid #dee2e6; */ /* Borde inferior opcional */
-}
-/* === FIN CAMBIO === */
-
-#current-timer-section h2 { margin-top: 0; color: #2c3e50; }
-#timer-display { font-size: 2.5em; font-weight: bold; color: #e74c3c; margin: 10px 0; }
-#stop-timer-btn { display: none; /* Oculto, ya que usamos botón en la tarea */ } 
-
-#schedule-section h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-top: 10px;}
-
-#task-list { list-style: none; padding: 0; margin: 0; }
-
-#task-list li {
-    background-color: white; padding: 10px 15px; margin-bottom: 10px;
-    border-radius: 5px; display: flex; align-items: center;
-    justify-content: space-between; flex-wrap: wrap;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease, border-left 0.3s ease;
-    border-left: 3px solid transparent; gap: 5px;
 }
 
-#task-list li input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); flex-shrink: 0; }
-#task-list li .task-info { flex-grow: 1; margin-right: 10px; min-width: 150px; }
-#task-list li .task-name { font-weight: bold; }
-#task-list li .task-details { font-size: 0.9em; color: #7f8c8d; }
+#log-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #34495e;
+    font-size: 1.1em;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 5px;
+}
 
-.task-actions { display: flex; align-items: center; flex-shrink: 0; }
+#event-log-display {
+    max-height: 150px; /* Altura máxima, luego scroll */
+    overflow-y: auto;  /* Scroll vertical si se llena */
+    background-color: #ecf0f1; /* Fondo interno */
+    border: 1px solid #bdc3c7; /* Borde sutil */
+    padding: 10px;
+    font-size: 0.85em; /* Letra un poco más pequeña */
+    line-height: 1.4;
+    border-radius: 3px;
+}
 
-.task-actions button { padding: 5px 10px; font-size: 0.9em; cursor: pointer; color: white; border: none; border-radius: 3px; white-space: nowrap; }
-.task-actions button.start-timer-btn { background-color: #2ecc71; }
-.task-actions button.start-timer-btn:hover { background-color: #27ae60; }
-.task-actions button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
-.task-actions button.stop-active-timer-btn { background-color: #e74c3c; }
-.task-actions button.stop-active-timer-btn:hover { background-color: #c0392b; }
+#event-log-display p {
+    margin: 0 0 4px 0; /* Espacio entre mensajes del log */
+    padding: 0;
+    border-bottom: 1px dashed #dde; /* Separador opcional */
+    padding-bottom: 3px;
+}
+#event-log-display p:last-child {
+     border-bottom: none; /* Sin borde en el último */
+}
+/* === FIN NUEVOS ESTILOS === */
 
-.task-actions .mini-timer-display { font-size: 0.9em; font-weight: bold; color: #e74c3c; margin-left: 8px; display: none; }
-
-#task-list li.completed .task-info { text-decoration: line-through; opacity: 0.6; }
-#task-list li.active-timer { background-color: #f1c40f !important; font-weight: bold; border-left-color: #f39c12 !important; }
-#task-list li.active-timer.current-reference-time { border-left-color: #f39c12 !important; }
-#task-list li.current-reference-time { background-color: #f8f9fa; border-left-color: #7f8c8d; }
-
-footer { text-align: center; margin-top: 20px; padding: 10px; color: #7f8c8d; font-size: 0.9em; }
-
-/* Media Query para pantallas pequeñas (< 600px) */
+/* Media Query */
 @media (max-width: 600px) {
-    header { padding: 10px; } /* Reducir padding header */
-    header h1 { font-size: 1.2em; }
-    #clock { font-size: 1em; padding: 3px 6px; top: 10px; right: 10px; }
-    
-    /* Ajuste para que el timer fijo no tape el inicio de la lista */
-     main { padding-top: 5px; } /* Reducir padding superior para compensar timer fijo */
-    #current-timer-section { padding: 10px; /* Menos padding en móvil */ }
-     #timer-display { font-size: 2em; } /* Timer un poco más pequeño */
+    /* ... (sin cambios en las reglas anteriores de media query) ... */
 
-    .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px;}
-    .mute-control { width: 100%; text-align: center; margin-left: 0 !important; margin-top: 10px; }
-
-    #task-list li { flex-direction: column; align-items: flex-start; padding: 12px; border-left-width: 5px; }
-    #task-list li .task-info { margin-bottom: 8px; margin-right: 0; width: 100%; min-width: auto; /* Quitar min-width en móvil */}
-    .task-actions { margin-top: 5px; align-self: flex-end; width: auto; }
+     /* Ajustar log en móvil si es necesario */
+     #log-section {
+         padding: 10px;
+     }
+     #event-log-display {
+         max-height: 120px; /* Un poco menos de altura en móvil */
+         font-size: 0.8em;
+     }
 }
