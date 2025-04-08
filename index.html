@@ -3,59 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guía de Tiempos NEFRA</title>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#003366"/> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"> </head>
+    <title>Guía de Tiempos SMAPD</title>
+    <link rel="stylesheet" href="styles/style.css"> <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Guía Tiempos">
+    <link rel="apple-touch-icon" href="images/icon-192x192.png"> </head>
 <body>
-    <div class="timer-container">
-        <div id="clockDisplay" class="clock-display">--:--:--</div>
+    <header>
+        <h1>Guía de Tiempos SMAPD (Listatimer)</h1>
+        <div id="clock">--:--:--</div>
+    </header>
 
-        <h1>Guía de Tiempos NEFRA</h1>
-
-        <div class="shift-selector">
-            <button id="btnManana" class="shift-button">Turno Mañana</button>
-            <button id="btnTarde" class="shift-button">Turno Tarde</button>
+    <main>
+        <div class="controls">
+            <button id="morning-shift-btn">Turno Mañana</button>
+            <button id="afternoon-shift-btn">Turno Tarde</button>
+            <button id="request-notification-permission" style="display: none; margin-left: 10px;">Permitir Notificaciones</button>
         </div>
 
-        <h2 id="currentShiftTitle"></h2> <div id="taskList" class="task-list">
-            <p>Seleccione un turno para ver las tareas.</p>
-            </div>
-
-        <hr class="separator">
-
-        <div id="timerControl" class="timer-control" style="display: none;"> <h3 id="currentTaskForTimer"></h3> <div id="timerDisplay" class="timer-display">--:--</div>
-            <button id="startTimerBtn" class="timer-button start">Iniciar Timer</button>
-            <button id="stopTimerBtn" class="timer-button stop" style="display: none;">Detener Timer</button>
-            <small id="timerWarning" class="timer-warning" style="display: none;">
-                </small>
+        <div id="current-timer-section">
+            <h2>Timer Activo</h2>
+            <div id="timer-task-name">Ninguna</div>
+            <div id="timer-display">--:--</div>
+            <button id="stop-timer-btn" style="display: none;">Detener Timer</button>
         </div>
 
-        <div id="alertArea" class="alert-area">
-            </div>
+        <div id="schedule-section">
+            <h2 id="schedule-title">Selecciona un turno</h2>
+            <ul id="task-list">
+                </ul>
+        </div>
+    </main>
 
-        <div class="footer-disclaimer">
-           <small>Herramienta de apoyo. La responsabilidad final es del técnico.</small>
-       </div>
+    <footer>
+        </footer>
 
-    </div>
-
-    <script src="scripts/schedule-data.js"></script>
-    <script src="scripts/timer-app.js"></script>
-    <script>
-        // Registro del Service Worker (asumiendo sw.js está en la raíz)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js') // Usar /sw.js para asegurar el scope raíz
-                .then(registration => {
-                    console.log('ServiceWorker Guía Tiempos registrado:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('Fallo registro SW Guía Tiempos:', error);
-                });
-            });
-        }
-    </script>
-     </body>
+    <audio id="timer-end-sound" src="sounds/timer_end.mp3" preload="auto"></audio> <script src="scripts/schedule-data.js"></script>
+    <script src="scripts/timer-app.js"></script> 
+</body>
 </html>

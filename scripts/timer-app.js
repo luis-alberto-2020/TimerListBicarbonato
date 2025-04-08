@@ -1,402 +1,399 @@
-// =============================================
-//      scripts/timer-app.js - Código Completo
-//      (Guía de Tiempos con Reloj y Checkboxes)
-// =============================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias a elementos del DOM ---
-    const clockDisplay = document.getElementById('clockDisplay');
-    const btnManana = document.getElementById('btnManana');
-    const btnTarde = document.getElementById('btnTarde');
-    const currentShiftTitle = document.getElementById('currentShiftTitle');
-    const taskListDiv = document.getElementById('taskList');
-    const timerControlDiv = document.getElementById('timerControl');
-    const currentTaskForTimer = document.getElementById('currentTaskForTimer');
-    const timerDisplay = document.getElementById('timerDisplay');
-    const startTimerBtn = document.getElementById('startTimerBtn');
-    const stopTimerBtn = document.getElementById('stopTimerBtn');
-    const timerWarning = document.getElementById('timerWarning');
-    const alertArea = document.getElementById('alertArea');
+    // --- Elementos del DOM ---
+    const clockElement = document.getElementById('clock');
+    const morningShiftBtn = document.getElementById('morning-shift-btn');
+    const afternoonShiftBtn = document.getElementById('afternoon-shift-btn');
+    const scheduleTitle = document.getElementById('schedule-title');
+    const taskListUl = document.getElementById('task-list');
+    const timerTaskName = document.getElementById('timer-task-name');
+    const timerDisplay = document.getElementById('timer-display');
+    const stopTimerBtn = document.getElementById('stop-timer-btn');
+    const notificationPermissionBtn = document.getElementById('request-notification-permission');
+    const timerEndSound = document.getElementById('timer-end-sound'); // Opcional
 
-    // --- Variables de Estado ---
-    let currentShift = null; // 'morning' o 'afternoon'
-    let currentTasks = [];   // Tareas del turno actual
-    let timerInterval = null; // Referencia al intervalo del timer activo
-    let secondsRemaining = 0; // Segundos restantes en el timer
-    let currentTimedTask = null; // La tarea específica cuyo timer está activo/listo
-    let highlightInterval = null; // Referencia al intervalo que actualiza la UI
-    let clockInterval = null; // Intervalo para el reloj
-    let lastUpcomingTaskAlerted = -1; // Índice de la última tarea futura notificada
-    let taskCompletionState = {}; // Almacena estado de checkboxes { morning: [bool, bool,...], afternoon: [...] }
+    // --- Estado de la Aplicación ---
+    let currentShift = null;
+    let tasks = [];
+    let activeTimerInterval = null;
+    let remainingSeconds = 0;
+    let activeTaskId = null;
+    let referenceReminderInterval = null;
+    let remindedTasks = new Set(); // Para no recordar la misma tarea varias veces seguidas
 
-    // --- Constantes ---
-    const HIGHLIGHT_INTERVAL_MS = 15000; // Cada cuánto revisar hora actual (15 segs)
-    const ALERT_BEFORE_MINUTES = 5;      // Minutos antes para mostrar alerta de próxima tarea
-    const STORAGE_KEY_PREFIX = 'nfrTimerTaskState_'; // Prefijo para localStorage
-
-    // --- Inicialización de la Aplicación ---
+    // --- Inicialización ---
     function init() {
-        // Asignar funciones a los botones de turno
-        btnManana.addEventListener('click', () => selectShift('morning'));
-        btnTarde.addEventListener('click', () => selectShift('afternoon'));
-        // Asignar funciones a los botones del timer
-        startTimerBtn.addEventListener('click', startTimer);
-        stopTimerBtn.addEventListener('click', stopTimer);
-        // Iniciar reloj
-        startClock();
-        console.log("App Guía de Tiempos inicializada.");
+        updateClock();
+        setInterval(updateClock, 1000); // Actualiza el reloj cada segundo
+
+        morningShiftBtn.addEventListener('click', () => loadShift('morning'));
+        afternoonShiftBtn.addEventListener('click', () => loadShift('afternoon'));
+        stopTimerBtn.addEventListener('click', stopCurrentTimer);
+
+        // Cargar último turno si existe
+        const lastShift = localStorage.getItem('lastShift');
+        if (lastShift) {
+            loadShift(lastShift);
+        } else {
+            // Opcional: Cargar un turno por defecto si no hay nada guardado
+             // loadShift('morning');
+        }
+
+        setupNotificationButton();
+        // No iniciar recordatorios hasta que se cargue un turno
+        // startReferenceReminders();
     }
 
     // --- Reloj ---
-    function startClock() {
-        if (clockInterval) clearInterval(clockInterval);
-        updateClock(); // Llamar inmediatamente
-        clockInterval = setInterval(updateClock, 1000); // Actualizar cada segundo
-    }
-
     function updateClock() {
         const now = new Date();
-        // Formato HH:MM:SS
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        if (clockDisplay) {
-             clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-        }
+        clockElement.textContent = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
-    // --- Selección de Turno ---
-    function selectShift(shiftName) {
+    // --- Carga de Turnos y Tareas ---
+    function loadShift(shiftName) {
+        console.log(`Cargando turno: ${shiftName}`);
         currentShift = shiftName;
-        currentTasks = scheduleData[shiftName] || [];
-
-        // Marcar botón activo/inactivo
-        if(shiftName === 'morning') {
-            btnManana.classList.add('active');
-            btnTarde.classList.remove('active');
-        } else {
-            btnTarde.classList.add('active');
-            btnManana.classList.remove('active');
-        }
-
-        // Actualizar título
-        currentShiftTitle.textContent = `Cronograma Turno ${shiftName === 'morning' ? 'Mañana' : 'Tarde'}`;
-
-        // Cargar estado de checkboxes ANTES de mostrar tareas
-        loadTaskCompletionState();
-        // Mostrar la lista de tareas con checkboxes
-        displayTasks();
-
-        // Resetear/Parar Timers y Alertas
-        stopTimer();
-        timerControlDiv.style.display = 'none'; // Ocultar control timer
-        alertArea.innerHTML = ''; // Limpiar alertas
-        lastUpcomingTaskAlerted = -1; // Resetear índice de última alerta
-
-        // Iniciar/Reiniciar el intervalo de actualización de UI (resaltado y alertas)
-        if (highlightInterval) clearInterval(highlightInterval);
-        highlightInterval = setInterval(updateHighlightAndCheckAlerts, HIGHLIGHT_INTERVAL_MS);
-        updateHighlightAndCheckAlerts(); // Llamar inmediatamente para estado inicial
-
-        console.log("Turno seleccionado:", shiftName);
+        tasks = scheduleData[shiftName] || [];
+        scheduleTitle.textContent = `Turno ${shiftName === 'morning' ? 'Mañana' : 'Tarde'}`;
+        localStorage.setItem('lastShift', shiftName);
+        remindedTasks.clear(); // Limpia las tareas recordadas al cambiar de turno
+        renderTaskList();
+        stopCurrentTimer(); // Detiene cualquier timer al cambiar de turno
+        startReferenceReminders(); // (Re)inicia el chequeo para el nuevo turno
     }
 
-    // --- Mostrar Lista de Tareas (con Checkboxes) ---
-    function displayTasks() {
-        taskListDiv.innerHTML = ''; // Limpiar lista anterior
-        if (currentTasks.length === 0) {
-            taskListDiv.innerHTML = '<p>No hay tareas definidas para este turno.</p>';
+    function renderTaskList() {
+        taskListUl.innerHTML = ''; // Limpiar lista anterior
+        if (tasks.length === 0) {
+            taskListUl.innerHTML = '<li>No hay tareas definidas para este turno.</li>';
             return;
         }
-        const ul = document.createElement('ul');
-        currentTasks.forEach((task, index) => {
+        const completedTasks = getCompletedTasks();
+
+        tasks.forEach(task => {
             const li = document.createElement('li');
-            li.dataset.index = index;
+            li.id = task.id;
+            const isCompleted = completedTasks.has(task.id);
+            li.className = isCompleted ? 'completed' : '';
 
-            // Verificar estado completado desde el estado cargado
-            const isCompleted = taskCompletionState[currentShift] && taskCompletionState[currentShift][index];
-            if (isCompleted) {
-                li.classList.add('completed');
-            }
+            // Calcula la duración correcta para mostrar (puede ser la ajustada o la base)
+            const displayDurationMinutes = getTaskDurationMinutes(task);
 
-            // Crear Checkbox
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = isCompleted;
-            checkbox.dataset.taskIndex = index; // Guardar índice en el checkbox
-            checkbox.classList.add('task-checkbox');
-            checkbox.addEventListener('change', handleTaskCheck); // Asignar manejador
-            li.appendChild(checkbox);
+            li.innerHTML = `
+                <input type="checkbox" ${isCompleted ? 'checked' : ''} data-task-id="${task.id}" title="Marcar como completada">
+                <div class="task-info">
+                    <span class="task-name">${task.name}</span>
+                    <div class="task-details">Ref: ${task.time} / Dur: ${displayDurationMinutes} min</div>
+                </div>
+                <button class="start-timer-btn" data-task-id="${task.id}" title="Iniciar temporizador para esta tarea">Iniciar Timer</button>
+            `;
 
-            // Crear Texto de la tarea (dentro de un span para que el click funcione mejor)
-            const textSpan = document.createElement('span');
-            textSpan.classList.add('task-text');
-            const startTime = task.start ? `<span class="task-time">[${task.start}]</span> ` : '';
-            let taskHtml = `${startTime}${task.name} (${task.duration} min)`;
-            // Añadir indicación visual si la tarea tiene timer
-            if (task.timed) {
-                 taskHtml += ' <small style="color:#007bff; font-weight:bold;">(Timer)</small>';
-            }
-            textSpan.innerHTML = taskHtml;
-            li.appendChild(textSpan);
+            // Event listener para el checkbox
+            li.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                toggleTaskCompletion(task.id, e.target.checked);
+            });
 
-            // Añadir listener al LI para que clickear en el texto también marque/desmarque
-             li.addEventListener('click', (e) => {
-                 // Solo simular click si NO se clickeó directamente en el checkbox
-                 if (e.target !== checkbox) {
-                     checkbox.checked = !checkbox.checked;
-                     // Disparar manualmente el evento 'change' en el checkbox para activar handleTaskCheck
-                     checkbox.dispatchEvent(new Event('change'));
-                 }
-             });
+            // Event listener para el botón de timer
+            li.querySelector('.start-timer-btn').addEventListener('click', () => {
+                startTimer(task.id); // Pasamos solo el ID
+            });
 
-            ul.appendChild(li);
+            taskListUl.appendChild(li);
         });
-        taskListDiv.appendChild(ul);
     }
 
-    // --- Lógica de Checkboxes y Persistencia ---
-    // Se llama cuando un checkbox cambia
-    function handleTaskCheck(event) {
-        const checkbox = event.target;
-        const taskIndex = parseInt(checkbox.dataset.taskIndex, 10);
-        const li = checkbox.closest('li'); // El elemento <li> padre
+    // Obtiene la duración en minutos para mostrar en UI
+    function getTaskDurationMinutes(task) {
+        // ADJUSTED_TIMES guarda segundos, lo convertimos a minutos para mostrar
+        const adjustedSeconds = ADJUSTED_TIMES[task.name];
+        if (adjustedSeconds !== undefined) {
+            return adjustedSeconds / 60;
+        }
+        return task.duration || 0; // Usa la duración base del schedule-data
+    }
 
-        if (checkbox.checked) {
+     // Obtiene la duración en segundos para usar en el TIMER
+     function getTimerDurationSeconds(task) {
+        const adjustedSeconds = ADJUSTED_TIMES[task.name];
+        if (adjustedSeconds !== undefined) {
+            return adjustedSeconds; // Usa el tiempo ajustado si existe
+        }
+        return (task.duration || 0) * 60; // Usa la duración base convertida a segundos
+    }
+
+
+    // --- Completado de Tareas (LocalStorage) ---
+    function toggleTaskCompletion(taskId, isCompleted) {
+        const li = document.getElementById(taskId);
+        if (!li) return;
+        const completedTasks = getCompletedTasks();
+        if (isCompleted) {
             li.classList.add('completed');
+            completedTasks.add(taskId);
         } else {
             li.classList.remove('completed');
+            completedTasks.delete(taskId);
         }
-        // Actualizar el estado en memoria
-        updateTaskCompletionState(taskIndex, checkbox.checked);
-        // Guardar todos los estados del turno actual en localStorage
-        saveTaskCompletionState();
+        saveCompletedTasks(completedTasks);
     }
 
-    // Actualiza el array en memoria para el estado de una tarea
-    function updateTaskCompletionState(index, isCompleted) {
-        if (!currentShift || !taskCompletionState[currentShift]) return;
-        taskCompletionState[currentShift][index] = isCompleted;
+    function getCompletedTasks() {
+        const completed = localStorage.getItem(`completedTasks_${currentShift}`);
+        return completed ? new Set(JSON.parse(completed)) : new Set();
     }
 
-    // Guarda el array de estados booleanos del turno actual en localStorage
-    function saveTaskCompletionState() {
-        if (!currentShift) return;
-        try {
-            const key = `${STORAGE_KEY_PREFIX}${currentShift}`; // Clave única por turno
-            localStorage.setItem(key, JSON.stringify(taskCompletionState[currentShift] || []));
-           // console.log("Estado de tareas guardado para", currentShift);
-        } catch (e) {
-            console.error("Error al guardar estado de tareas en localStorage:", e);
-            showAlert("Error al guardar progreso de tareas."); // Informar al usuario
+    function saveCompletedTasks(completedSet) {
+        if (currentShift) {
+            localStorage.setItem(`completedTasks_${currentShift}`, JSON.stringify(Array.from(completedSet)));
         }
     }
 
-    // Carga el estado de las tareas para el turno actual desde localStorage
-    function loadTaskCompletionState() {
-        if (!currentShift) return;
-        try {
-            const key = `${STORAGE_KEY_PREFIX}${currentShift}`;
-            const savedState = localStorage.getItem(key);
-            if (savedState) {
-                const parsedState = JSON.parse(savedState);
-                // Asegurarse de que el estado cargado tenga la longitud correcta
-                if (parsedState.length === currentTasks.length) {
-                    taskCompletionState[currentShift] = parsedState;
-                } else {
-                     // Si la longitud no coincide (ej. cambio en schedule-data), inicializar
-                    console.warn("Longitud de estado guardado no coincide, reiniciando.");
-                    taskCompletionState[currentShift] = Array(currentTasks.length).fill(false);
-                }
-                // console.log("Estado de tareas cargado para", currentShift);
-            } else {
-                // Si no hay estado guardado, inicializar como array de falsos
-                taskCompletionState[currentShift] = Array(currentTasks.length).fill(false);
-                // console.log("Inicializando estado de tareas para", currentShift);
-            }
-        } catch (e) {
-            console.error("Error al cargar estado de tareas de localStorage:", e);
-            // Inicializar con falsos en caso de error
-            taskCompletionState[currentShift] = Array(currentTasks.length).fill(false);
+    // --- Lógica del Timer ---
+    function startTimer(taskId) {
+        if (activeTimerInterval) {
+            // Opcional: Preguntar si quiere detener el timer actual
+            // if (!confirm("Ya hay un timer activo. ¿Deseas detenerlo y empezar uno nuevo?")) {
+            //     return;
+            // }
+            stopCurrentTimer(); // Detiene el timer anterior si existe
         }
-    }
 
-
-    // --- Función Principal de Actualización Periódica (Resaltado y Alertas) ---
-     function updateHighlightAndCheckAlerts() {
-        if (!currentShift) return;
-
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTimeMinutes = currentHour * 60 + currentMinute;
-
-        let activeTaskLi = null;
-        let relevantTimedTask = null;
-        let nextTaskToAlert = null;
-
-        // 1. Quitar resaltado anterior
-        taskListDiv.querySelectorAll('li').forEach(li => li.classList.remove('current-task'));
-
-        // 2. Iterar tareas para resaltar actual y encontrar próxima para alertar
-        for (let i = 0; i < currentTasks.length; i++) {
-             const task = currentTasks[i];
-             if (task.start && task.duration > 0) { // Considerar tareas con inicio y duración
-                const [startHour, startMinute] = task.start.split(':').map(Number);
-                const taskStartTimeMinutes = startHour * 60 + startMinute;
-                const taskEndTimeMinutes = taskStartTimeMinutes + task.duration;
-
-                // --- Resaltado ---
-                if (currentTimeMinutes >= taskStartTimeMinutes && currentTimeMinutes < taskEndTimeMinutes) {
-                    const li = taskListDiv.querySelector(`li[data-index="${i}"]`);
-                    if (li) {
-                        li.classList.add('current-task');
-                        activeTaskLi = li;
-                    }
-                    // Si esta tarea tiene timer y NO hay uno corriendo, es la relevante para el botón
-                    if (task.timed && !timerInterval) {
-                        relevantTimedTask = task;
-                    }
-                }
-
-                // --- Lógica Alerta Próxima Tarea ---
-                const timeDiffMinutes = taskStartTimeMinutes - currentTimeMinutes;
-                if (timeDiffMinutes > 0 && timeDiffMinutes <= ALERT_BEFORE_MINUTES && i > lastUpcomingTaskAlerted) {
-                     if (!nextTaskToAlert || taskStartTimeMinutes < (nextTaskToAlert.startHour * 60 + nextTaskToAlert.startMinute)) {
-                         nextTaskToAlert = { ...task, index: i, startHour, startMinute };
-                     }
-                }
-            } // end if task.start
-        } // end for
-
-        // 3. Disparar Alerta si corresponde
-         if (nextTaskToAlert) {
-             showAlert(`Próxima Tarea (${nextTaskToAlert.start}): ${nextTaskToAlert.name}`);
-             lastUpcomingTaskAlerted = nextTaskToAlert.index; // Marcar como alertada
-             console.log("Alerta mostrada para tarea índice:", nextTaskToAlert.index);
-         }
-
-        // 4. Configurar el botón y display del Timer
-         if (relevantTimedTask && !timerInterval) {
-            // Mostrar botón INICIAR
-            timerControlDiv.style.display = 'block';
-            currentTaskForTimer.textContent = `Timer para: ${relevantTimedTask.name}`;
-            timerDisplay.textContent = formatTime(relevantTimedTask.timerDuration);
-            startTimerBtn.disabled = false;
-            startTimerBtn.dataset.taskIndex = currentTasks.indexOf(relevantTimedTask); // Guardar índice
-            stopTimerBtn.style.display = 'none';
-             // Advertencia desinfección
-             if (relevantTimedTask.name.toLowerCase().includes("desinfección")) {
-                timerWarning.style.display = 'block';
-                timerWarning.textContent = '¡Atención! Protocolo requiere 30 min.';
-            } else {
-                 timerWarning.style.display = 'none';
-            }
-        } else if (!timerInterval) {
-            // No hay timer activo y no hay tarea relevante -> Ocultar/Deshabilitar
-            timerControlDiv.style.display = 'block'; // O 'none' si prefieres ocultarlo
-            currentTaskForTimer.textContent = activeTaskLi ? "Tarea actual sin timer manual" : "Esperando próxima tarea...";
-            timerDisplay.textContent = "--:--";
-            startTimerBtn.disabled = true;
-            stopTimerBtn.style.display = 'none';
-            timerWarning.style.display = 'none';
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) {
+             console.error("No se encontró la tarea con ID:", taskId);
+             return;
         }
-        // Si hay un timer corriendo (timerInterval existe), la UI del timer (display, botón stop) ya está visible y no se toca aquí.
-     } // Fin updateHighlightAndCheckAlerts
 
+        activeTaskId = taskId;
+        // Usa la función para obtener segundos para el timer (considera ajustes)
+        const durationSeconds = getTimerDurationSeconds(task);
 
-    // --- Funciones de Manejo del Timer ---
-    function startTimer() {
-        const taskIndex = startTimerBtn.dataset.taskIndex;
-        if (taskIndex === undefined || timerInterval) return;
+        if (durationSeconds <= 0) {
+            console.warn(`Tarea "${task.name}" sin duración válida para iniciar timer.`);
+            alert(`La tarea "${task.name}" no tiene una duración definida para iniciar el timer.`);
+            return; // No iniciar timer si no hay duración
+        }
 
-        currentTimedTask = currentTasks[taskIndex];
-        if (!currentTimedTask || !currentTimedTask.timed) return;
-
-        secondsRemaining = currentTimedTask.timerDuration;
+        remainingSeconds = durationSeconds;
+        timerTaskName.textContent = task.name;
         updateTimerDisplay();
 
-        startTimerBtn.disabled = true; // Deshabilitar botón inicio
-        stopTimerBtn.style.display = 'inline-block'; // Mostrar botón detener
-        timerWarning.style.display = 'none';
-        alertArea.innerHTML = ''; // Limpiar alertas al iniciar
+        // Deshabilitar todos los botones de iniciar timer y mostrar detener
+        document.querySelectorAll('.start-timer-btn').forEach(btn => btn.disabled = true);
+        stopTimerBtn.style.display = 'inline-block';
 
-        // Iniciar intervalo
-        timerInterval = setInterval(() => {
-            secondsRemaining--;
+        // Resaltar tarea activa
+        document.querySelectorAll('#task-list li').forEach(li => li.classList.remove('active-timer'));
+        const activeLi = document.getElementById(taskId);
+        if (activeLi) {
+            activeLi.classList.add('active-timer');
+        } else {
+            console.warn("No se encontró el elemento LI para resaltar:", taskId);
+        }
+
+
+        activeTimerInterval = setInterval(() => {
+            remainingSeconds--;
             updateTimerDisplay();
-            if (secondsRemaining <= 0) {
-                handleTimerEnd();
+            if (remainingSeconds < 0) { // Usar < 0 para asegurar que se detenga incluso si hay saltos
+                timerFinished(task);
             }
         }, 1000);
-        console.log("Timer iniciado para:", currentTimedTask.name);
+
+         console.log(`Timer iniciado para: ${task.name}`);
+         // Podrías añadir una breve animación o sonido aquí si quieres
     }
 
-    function stopTimer() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            stopTimerBtn.style.display = 'none'; // Ocultar botón detener
-            console.log("Timer detenido.");
-            updateHighlightAndCheckAlerts(); // Actualizar UI (habilitar/deshabilitar startBtn, etc.)
+    function stopCurrentTimer() {
+        if (activeTimerInterval) {
+            clearInterval(activeTimerInterval);
+            activeTimerInterval = null;
         }
-    }
+        const previouslyActiveTaskId = activeTaskId; // Guardar ID antes de limpiar
+        activeTaskId = null;
+        remainingSeconds = 0;
+        timerTaskName.textContent = 'Ninguna';
+        timerDisplay.textContent = '--:--';
 
-    function handleTimerEnd() {
-        const finishedTaskName = currentTimedTask ? currentTimedTask.name : 'Tarea';
-        console.log("Timer finalizado para:", finishedTaskName);
-        showAlert(`¡Tiempo completado para: ${finishedTaskName}!`);
-        stopTimer(); // Llama a stopTimer que limpia intervalo y actualiza UI
-    }
+        // Habilitar botones y ocultar detener
+        document.querySelectorAll('.start-timer-btn').forEach(btn => btn.disabled = false);
+        stopTimerBtn.style.display = 'none';
 
-    // Actualiza el display MM:SS
-    function updateTimerDisplay() {
-        if (timerInterval) { // Mostrar tiempo restante
-             timerDisplay.textContent = formatTime(secondsRemaining);
-        }
-         // Si no hay timer corriendo, updateHighlightAndCheckAlerts decide qué mostrar
-    }
-
-    // Formatea segundos a MM:SS
-    function formatTime(totalSeconds) {
-        if (totalSeconds < 0) totalSeconds = 0;
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    // --- Mostrar Mensajes de Alerta ---
-    function showAlert(message) {
-        alertArea.innerHTML = `<p class="alert-message">${message}</p>`;
-        console.log("Mostrando Alerta:", message);
-
-        // Opcional: sonido (requiere interacción del usuario previa en la página para garantizar reproducción)
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.type = 'triangle'; // Probar otro tono
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime); // Volumen bajo
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.6); // Fade out más largo
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.6);
-        } catch (e) {
-            console.warn("No se pudo reproducir sonido de alerta:", e);
-        }
-
-        // Limpiar alerta después de un tiempo
-        setTimeout(() => {
-            // Solo limpiar si el mensaje sigue siendo el mismo (evita borrar alertas nuevas)
-            if (alertArea.innerHTML.includes(message)) {
-                 alertArea.innerHTML = '';
+        // Quitar resaltado de la tarea que estaba activa
+         if (previouslyActiveTaskId) {
+            const activeLi = document.getElementById(previouslyActiveTaskId);
+            if (activeLi) {
+                 activeLi.classList.remove('active-timer');
             }
-        }, 15000); // Ocultar después de 15 segundos
+         }
+        console.log("Timer detenido.");
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.max(0, Math.floor(remainingSeconds / 60));
+        const seconds = Math.max(0, remainingSeconds % 60);
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function timerFinished(task) {
+        const taskName = task ? task.name : "Tarea desconocida"; // Manejar caso donde task sea null
+        stopCurrentTimer(); // Limpia intervalo, resetea UI
+
+        // Alerta/Notificación de fin
+        const message = `¡Tiempo completado para: ${taskName}!`;
+        alert(message); // Alerta simple del navegador
+        playTimerEndSound(); // Sonido opcional
+
+        // Opcional: Notificación del sistema si hay permiso
+        showNotification("Timer Finalizado", message);
+
+        console.log(message);
+
+        // Opcional: Marcar como completada
+        // if (task) {
+        //     toggleTaskCompletion(task.id, true);
+        //     const checkbox = document.querySelector(`#${task.id} input[type="checkbox"]`);
+        //     if (checkbox) checkbox.checked = true;
+        // }
+    }
+
+    function playTimerEndSound() {
+        if (timerEndSound) {
+            timerEndSound.play().catch(e => console.error("Error al reproducir sonido:", e));
+        }
+    }
+
+    // --- Lógica de Recordatorios de Referencia ---
+    function startReferenceReminders() {
+        if (referenceReminderInterval) {
+            clearInterval(referenceReminderInterval);
+        }
+        console.log("Iniciando chequeo de recordatorios de referencia...");
+        // Comprobar cada minuto si alguna tarea coincide con la hora de referencia
+        referenceReminderInterval = setInterval(checkReferenceTimes, 60 * 1000);
+        checkReferenceTimes(); // Comprobar inmediatamente al cargar/cambiar turno
+    }
+
+    function checkReferenceTimes() {
+        if (!currentShift || tasks.length === 0) return;
+
+        const now = new Date();
+        const currentTime = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }); // Formato HH:MM
+         // console.log(`Chequeando recordatorios para ${currentTime}`); // Debug
+
+        tasks.forEach(task => {
+            if (!task.time) return; // Saltar tareas sin hora de referencia
+
+            // Compara solo HH:MM
+            if (task.time === currentTime) {
+                // console.log(`Coincidencia de tiempo para ${task.name} a las ${task.time}`); // Debug
+                if (!remindedTasks.has(task.id)) {
+                    // Evita recordar si un timer ya está activo para esta tarea (opcional, ¿quizás sí recordar?)
+                    // if (activeTaskId !== task.id) {
+                        showReferenceReminder(task);
+                        remindedTasks.add(task.id); // Marcar como recordada en esta pasada
+                        // Limpiar el flag después de 61 segundos para permitir recordar el mismo minuto si es necesario (pero no en el mismo ciclo de chequeo)
+                         setTimeout(() => remindedTasks.delete(task.id), 61 * 1000);
+                    // } else {
+                    //     console.log(`Timer ya activo para ${task.name}, no se muestra recordatorio.`); // Debug
+                    // }
+                } else {
+                    // console.log(`${task.name} ya recordada recientemente.`); // Debug
+                }
+            }
+        });
+    }
+
+    function showReferenceReminder(task) {
+        console.log(`Recordatorio de referencia: ${task.time} - ${task.name}`);
+
+        // 1. Resaltado visual breve
+        const liElement = document.getElementById(task.id);
+        if (liElement) {
+            liElement.classList.add('reminder-highlight');
+            // Quitar resaltado después de un tiempo
+            setTimeout(() => {
+                if (liElement) { // Volver a comprobar si el elemento aún existe
+                     liElement.classList.remove('reminder-highlight');
+                }
+            }, 3500); // Duración del resaltado (ej. 3.5 segundos)
+        } else {
+             console.warn("Elemento LI no encontrado para recordatorio:", task.id);
+        }
+
+        // 2. Notificación del sistema (opcional, requiere permiso)
+        showNotification("Recordatorio SMAPD", `Referencia: ${task.time} - ${task.name}`);
+    }
+
+
+    // --- Notificaciones del Sistema ---
+    function setupNotificationButton() {
+        if (!('Notification' in window)) {
+            console.log("Este navegador no soporta notificaciones de escritorio.");
+            notificationPermissionBtn.style.display = 'none'; // Ocultar si no hay soporte
+            return;
+        }
+
+        if (Notification.permission === 'default') {
+            notificationPermissionBtn.style.display = 'inline-block';
+            notificationPermissionBtn.onclick = () => {
+                Notification.requestPermission().then(permission => {
+                    console.log("Resultado permiso:", permission);
+                    if (permission === 'granted') {
+                        console.log("Permiso de notificación concedido.");
+                        notificationPermissionBtn.style.display = 'none';
+                        showNotification("Permiso Concedido", "Ahora recibirás recordatorios y alertas.");
+                    } else {
+                        console.log("Permiso de notificación denegado.");
+                        notificationPermissionBtn.textContent = 'Notificaciones Bloqueadas';
+                        notificationPermissionBtn.disabled = true;
+                    }
+                });
+            };
+        } else if (Notification.permission === 'denied') {
+             notificationPermissionBtn.style.display = 'inline-block';
+             notificationPermissionBtn.textContent = 'Notificaciones Bloqueadas';
+             notificationPermissionBtn.disabled = true;
+        } else {
+            // Permiso ya concedido, ocultar botón
+             notificationPermissionBtn.style.display = 'none';
+        }
+    }
+
+    function showNotification(title, body) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') {
+            console.log("Permiso de notificación no concedido.");
+            return; // No hay permiso o soporte
+        }
+
+        // Uso de Service Worker para mostrar notificación (mejor para PWAs)
+        navigator.serviceWorker.getRegistration().then(registration => {
+            if (registration) {
+                 registration.showNotification(title, {
+                    body: body,
+                    icon: 'images/icon-192x192.png' // Ajusta la ruta a tu ícono
+                    // Puedes añadir más opciones: vibrate, tag, etc.
+                 }).catch(err => console.error("Error al mostrar notificación vía SW:", err));
+            } else {
+                // Fallback si no hay SW registrado (menos común en PWA funcional)
+                // Ojo: esto puede no funcionar si la pestaña no está activa
+                 try {
+                    new Notification(title, { body: body, icon: 'images/icon-192x192.png' });
+                 } catch (err) {
+                     console.error("Error al mostrar notificación directamente:", err);
+                 }
+            }
+        });
+    }
+
+    // --- Service Worker (PWA) ---
+    if ('serviceWorker' in navigator) {
+        // Registra usando el nombre de archivo correcto 'sw.js'
+        navigator.serviceWorker.register('sw.js')
+            .then(registration => console.log('Service Worker registrado con éxito:', registration.scope))
+            .catch(error => console.log('Error al registrar el Service Worker:', error));
     }
 
     // --- Iniciar la aplicación ---
     init();
-
-}); // Fin DOMContentLoaded
+});

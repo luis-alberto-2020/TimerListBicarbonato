@@ -1,46 +1,52 @@
-// Datos del cronograma con ajustes (Mezcla 25min, Desinfección 30min)
-// Tiempos de inicio/fin recalculados para coherencia interna
 const scheduleData = {
     morning: [
-        // Turno Mañana - Tareas Principales (Simplificado para visualización)
-        // Nota: Los tiempos exactos pueden variar en la práctica real
-        { name: "Llenado Mixer Agua", start: "05:00", duration: 20, timed: false, operator: 1 },
-        { name: "Carga Bicarbonato", start: "05:20", duration: 10, timed: false, operator: 1 },
-        { name: "Mezcla Bicarbonato", start: "05:30", duration: 25, timed: true, timerDuration: 25 * 60, operator: 1 }, // 25 min timer
-        { name: "Llenado Bidones", start: "05:55", duration: 25, timed: false, operator: 1 }, // Starts after 25min mix
-        { name: "Sala (Op 1)", start: "06:20", duration: 70, timed: false, operator: 1 }, // Ends 07:30
-        { name: "Desinfección Mixer", start: "07:30", duration: 30, timed: true, timerDuration: 30 * 60, operator: 1 }, // Protocol 30min
-        { name: "Enjuague Mixer", start: "08:00", duration: 20, timed: false, operator: 1 }, // Starts after 30min disinfect
-        { name: "Mixer Libre", start: "08:20", duration: 10, timed: false, operator: 'N/A' }, // Break before next cycle
-        // --- Cambio de Operario o Inicio Segundo Ciclo ---
-        { name: "Llenado Mixer Agua (Ciclo 2)", start: "08:30", duration: 10, timed: false, operator: 2 },
-        { name: "Carga Bicarbonato (Ciclo 2)", start: "08:40", duration: 20, timed: false, operator: 2 },
-        { name: "Mezcla Bicarbonato (Ciclo 2)", start: "09:00", duration: 25, timed: true, timerDuration: 25 * 60, operator: 2 }, // 25 min timer
-        { name: "Llenado Bidones (Ciclo 2)", start: "09:25", duration: 25, timed: false, operator: 2 }, // Assumed 25min fill time
-        { name: "Desayuno Operario 2", start: "09:50", duration: 25, timed: false, operator: 2 }, // Ends 10:15
-        { name: "Desinfección Mixer (Ciclo 2)", start: "10:15", duration: 30, timed: true, timerDuration: 30 * 60, operator: 2 }, // Protocol 30min
-        { name: "Sala (Op 2)", start: "10:45", duration: 105, timed: false, operator: 2 }, // Ends 12:30
-        { name: "Enjuague Mixer (Ciclo 2)", start: "12:30", duration: 20, timed: false, operator: 2 },
-        { name: "Mixer Libre Fin Turno Mañana", start: "12:50", duration: 0, timed: false, operator: 'N/A' }, // Placeholder end
-        // --- Tareas de Reuso (Paralelas) ---
-        { name: "[REUSO] Cloreado Bidones (3er T)", start: "09:00", duration: 30, timed: false, operator: 'Reuso' },
-        { name: "[REUSO] Enjuague Bidones (3er T)", start: "09:30", duration: 30, timed: false, operator: 'Reuso' },
+        // Datos extraídos del cronograma Turno Mañana
+        { id: 'm1', name: 'Llenado de Mixer con Agua de Osmosis', time: '05:00', duration: 20 },
+        { id: 'm2', name: 'Carga de Bicarbonato en polvo', time: '05:20', duration: 10 },
+        { id: 'm3', name: 'Recirculado de Preparacion de Bicarbonato', time: '05:30', duration: 20 },
+        { id: 'm4', name: 'Llenado de bidones con preparacion hasta 5 litros', time: '05:50', duration: 25 },
+        { id: 'm5', name: 'Atender Sala / Pacientes', time: '06:15', duration: 75 }, // Nombre aclarado
+        { id: 'm6', name: 'Cloreado de Mixer al 1%', time: '07:30', duration: 20 },
+        { id: 'm7', name: 'Doble enjuague de Mixer', time: '07:50', duration: 20 },
+        { id: 'm8', name: 'Llenado de Mixer con Agua de Osmosis', time: '08:10', duration: 20 },
+        { id: 'm9', name: 'Carga de Bicarbonato en polvo', time: '08:30', duration: 10 },
+        { id: 'm10', name: 'Recirculado de Preparacion de Bicarbonato', time: '08:40', duration: 20 },
+        { id: 'm11', name: 'DESAYUNO (con detencion de Mixer a las 9:10 hs)', time: '09:00', duration: 40 },
+        { id: 'm12', name: 'Cloreado de bidones del 3er turno al 1%', time: '09:00', duration: 30 }, // Tarea Paralela
+        { id: 'm13', name: 'Doble enjuague bidones del 3er turno', time: '09:30', duration: 30 }, // Tarea Paralela
+        { id: 'm14', name: 'Llenado de bidones con preparacion hasta 5 litros', time: '09:40', duration: 25 },
+        { id: 'm15', name: 'Cloreado de Mixer al 1%', time: '10:05', duration: 5 },
+        { id: 'm16', name: 'Atender Sala / Pacientes', time: '10:10', duration: 140 }, // Nombre aclarado
+        { id: 'm17', name: 'Doble enjuague de Mixer', time: '12:30', duration: 20 }
     ],
     afternoon: [
-         // Turno Tarde - Tareas Principales
-        { name: "Llenado Mixer Agua", start: "14:10", duration: 20, timed: false, operator: 1 },
-        { name: "Carga Bicarbonato", start: "14:30", duration: 10, timed: false, operator: 1 },
-        { name: "Mezcla Bicarbonato", start: "14:40", duration: 25, timed: true, timerDuration: 25 * 60, operator: 1 }, // 25 min timer
-        { name: "Llenado Bidones", start: "15:05", duration: 25, timed: false, operator: 1 }, // Starts after 25min mix
-        { name: "Sala (Operario)", start: "15:30", duration: 120, timed: false, operator: 1 }, // Ends 17:30
-        { name: "Desinfección Mixer", start: "17:30", duration: 30, timed: true, timerDuration: 30 * 60, operator: 1 }, // Protocol 30min
-        { name: "Enjuague Mixer", start: "18:00", duration: 20, timed: false, operator: 1 }, // Starts after 30min disinfect
-        { name: "Mixer Libre Fin Turno Tarde", start: "18:20", duration: 0, timed: false, operator: 'N/A' },
-        // --- Tareas de Reuso (Paralelas) ---
-        { name: "[REUSO] Cloreado Bidones (2do T)", start: "18:00", duration: 30, timed: false, operator: 'Reuso' },
-        { name: "[REUSO] Enjuague Bidones (2do T)", start: "18:30", duration: 30, timed: false, operator: 'Reuso' },
+        // Datos extraídos del cronograma Turno Tarde
+        { id: 't1', name: 'Llenado de Mixer con Agua de Osmosis', time: '14:10', duration: 20 },
+        { id: 't2', name: 'Carga de Bicarbonato en polvo', time: '14:30', duration: 10 },
+        { id: 't3', name: 'Recirculado de Preparacion de Bicarbonato', time: '14:40', duration: 20 },
+        { id: 't4', name: 'Llenado de bidones con preparacion hasta 5 litros', time: '15:00', duration: 25 },
+        { id: 't5', name: 'Atender Sala / Pacientes', time: '15:25', duration: 125 }, // Nombre aclarado
+        { id: 't6', name: 'Cloreado de Mixer al 1%', time: '17:30', duration: 20 },
+        { id: 't7', name: 'Doble enjuague de Mixer', time: '17:50', duration: 20 },
+        { id: 't8', name: 'Cloreado de bidones del 2do turno al 1%', time: '18:00', duration: 30 },
+        { id: 't9', name: 'Doble enjuague bidones del 2do turno', time: '18:30', duration: 30 }
     ]
 };
 
-// Es crucial revisar y validar que esta lista de tareas, sus horarios y duraciones
-// reflejen lo más fielmente posible el flujo de trabajo deseado para la guía.
+// Tiempos especiales ajustados (en segundos para la lógica del timer)
+// Asegúrate que el nombre coincida EXACTAMENTE con el 'name' en los datos de arriba si aplica
+const ADJUSTED_TIMES = {
+    // Ejemplo si 'Preparación de Bicarbonato / Mezcla' fuera una tarea distinta:
+    // 'Preparación de Bicarbonato / Mezcla': 25 * 60,
+    'Desinfección Máquinas': 30 * 60 // Ajusta si 'Desinfección Máquinas' existe en tus datos con otro nombre exacto
+    // Añade aquí otras tareas si necesitan un tiempo fijo diferente a su duración base
+};
+
+// Nota: La tarea "Preparación de Bicarbonato / Mezcla" y "Desinfección Máquinas"
+// deben tener EXACTAMENTE ese nombre en las listas de arriba para que
+// ADJUSTED_TIMES funcione. Revisa y ajusta si es necesario.
+// Si la mezcla es 'Recirculado de Preparacion de Bicarbonato' o similar, usa ese nombre en ADJUSTED_TIMES.
+// Basado en los cronogramas, parece que no hay una tarea llamada exactamente "Mezcla Bicarbonato" o "Desinfección Máquinas",
+// así que ADJUSTED_TIMES podría no aplicar o necesitar que ajustes los nombres clave.
+// Por ahora, se usarán las duraciones calculadas de los cronogramas para todas las tareas.
+// Si necesitas forzar 25/30 min para alguna tarea específica, ajusta su nombre exacto en ADJUSTED_TIMES.
